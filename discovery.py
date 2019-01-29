@@ -10,10 +10,13 @@ import nmap
 import json
 import socket
 import shodan
+import dns.zone
 import requests
-import exiftool
 import argparse
+import dns.query
 import sublist3r
+import pythonwhois
+import dns.resolver
 from random import randint
 from bs4 import BeautifulSoup
 from signal import signal, SIGINT
@@ -108,93 +111,72 @@ def banner() :
 # the result to show you importants informations
 ########################################################################
 def get_whois(domain): 
-	dns = []
+	dns_servers = []
 	data = ""
 	print("{0}[#] Querying whois databases{1}".format(white, end))
-	try :
-		output = check_output(["whois", "{0}".format(domain)])
-		output = output.decode('ascii')
-		buf = io.StringIO(output)
-		lines = buf.readlines()[20:]
-		for line in lines :
-			if "Domain Name:" in line :
-				data = "{0}\t-Domain : {1}{2}".format(green, line.replace("Domain Name: ", ""), end)
-			if "Registrar:" in line :
-				data += "\t{0}-Registrar : {1}{2}".format(green, line.replace("Registrar: ", ""), end)
-			if "Registrant Country:" in line :
-				data += "\t{0}-Country : {1}{2}".format(green, line.replace("Country: ", ""), end)
-			if "Name Server:" in line :
-				server = line.replace("Name Server: ", "").replace("   ", "").replace("\n", "").lower()
-				if server not in dns and server is not '' :
-					dns.append(server)
-					data += "\t{0}-DNS Server : {1}{2}\n".format(green, server, end)
-		whois_information = open("{0}/whois/{0}.whois".format(domain), "w+")
-		whois_information.write(output)
-		whois_information.close()
-		print(data)
-		print("\t{0}{1}[!] Full whois report written in {2}/whois/whois{3}\n".format(end, red, domain, end))
-		return dns
-	except :
-		print("{0}\t-No record found.{1}\n".format(red, end))
-		return None
+	values = pythonwhois.get_whois(domain)
+	print(values)
+	if len(values) > 0 :
+		for value in values :
+			if value == "nameservers":
+				for server in values[value] :
+					server = server.lower()
+					if server not in dns_servers :
+						dns_servers.append(server)
+					data += "\t{0}DNS Server : {1}{2}\n".format(green, server, end)
+			if value == "registrar" :
+				data += "\t{0}Registrar : {1}{2}\n".format(green, str(values[value][0]), end)
+			if value == "contact" :
+				data += "\t{0}Contact : {1}{2}\n".format(green, str(values[value][0]), end)
+	print(data)	
+	return dns_servers
 
 ################################################################################################
 # This function will try to achieve DNS transfert, query DNS'su sing dig and parses the results
 ################################################################################################
-def dns_info(domain, dns):
+def dns_info(domain, dns_servers):
 	print("{}[#] Gathering informations using DNS queries.{}".format(white, end))
-	output = check_output(["dig", "ANY", "@8.8.8.8", "{0}".format(domain)])
-	output = output.decode('ascii')
-	lines = io.StringIO(output).readlines()
-	a = re.compile(r'IN\s+A\s')
-	aaaa = re.compile(r'IN\s+AAAA\s')
-	mx = re.compile(r'IN\s+MX\s')
-	ns = re.compile(r'IN\s+NS\s')
-	txt = re.compile(r'IN\s+TXT\s')
-	soa = re.compile(r'IN\s+SOA\s')
-	for line in lines :
-		if a.search(line) :
-			server = line.replace("\n","").split("\t")[5]
-			print("{0}\t-Record A    detected : {1}{2}".format(green, server, end))
-		if mx.search(line) :
-			server = line.replace("\n","").split("\t")[5]
-			print("{0}\t-Record MX   detected : {1}{2}".format(green, server, end))
-		if aaaa.search(line) :
-			server = line.replace("\n","").split("\t")[5]
-			print("{0}\t-Record AAAA detected : {1}{2}".format(green, server, end))
-		if txt.search(line) :
-			server = line.replace("\n","").split("\t")[5]
-			print("{0}\t-Record TXT  detected : {1}{2}".format(green, server, end))
-		if soa.search(line) :
-			server = line.replace("\n","").split("\t")[5]
-			print("{0}\t-Record SOA  detected : {1}{2}".format(green, server, end))
-		if ns.search(line) :
-			server = line.replace("\n","").split("\t")[5].rsplit(".", 1)[0]
-			if server not in dns :
-				dns.append(server)
-			print("{0}\t-Record NS   detected : {1}{2}".format(green, server, end))
-	output_write = open("{0}/dns/dig".format(domain), "w+")
-	output_write.write(output)
-	output_write.close()
-	print("\n\t{0}[!] Full dig report written in {1}/dns/dig{2}\n".format(red, domain, end))
-	if dns is not None :
+	data = "{0}".format(green)
+	records = ["A", "AAAA", "SOA", "NS", "MX", "TXT"]
+	for record in records :
+		try :
+			values = dns.resolver.query(domain, record)
+		except :
+			pass
+		if values : 
+			for value in values:
+				if record == "A" :
+					data += "\tRecord A    : {0}\n".format(value) 
+				if record == "AAAA" :
+					data += "\tRecord AAAA : {0}\n".format(value) 
+				if record == "MX" :
+					data += "\tRecord MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0]) 
+				if record == "SOA" :
+					data += "\tRecord SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0]) 
+				if record == "NS" :
+					data += "\tRecord NS   : {0}\n".format(str(value).rsplit(".", 1)[0])
+					if str(value).rsplit(".", 1)[0] not in dns_servers :
+						dns_servers.append(str(value).rsplit(".", 1)[0])
+				if record == "TXT" :
+					data += "\tRecord TXT  : {0}\n".format(str(value).rsplit(".", 1)[0])
+	print(data + "{0}".format(end))
+	print("\t{0}[!] Full dig report written in {1}/dns/dig{2}\n".format(red, domain, end))
+	if len(dns_servers) > 0 :
 		print("{}[#] Testing for DNS zone transfert.{}".format(white, end))
-		for dns_server in dns :
+		for dns_server in dns_servers :
 			if dns_server :
 				try :
-					output = check_output(["dig", "axfr", "@{0}".format(dns_server), "{0}".format(domain)])
-					output = output.decode('ascii')
-					buf = io.StringIO(output).read()
-					if "Transfer failed" not in buf :
-						print("{0}\t-DNS zone transfer successful for {1}{2}".format(green, dns_server, end))
-						write_to_file = open("{0}/dns/{1}.transfert".format(domain, dns_server), "w+")
-						write_to_file.write(output)
-						write_to_file.close()
-						print("{0}\t\tResults written in {1}/dns/{2}".format(red, domain, dns_server))
-					else :
-						print("{0}\t-{1} : failed.{2}".format(red, dns_server, end))
-				except :
-					print("{0}\t-{1} : failed.{2}".format(red, dns_server, end))
+					result  = dns.zone.from_xfr(dns.query.xfr(dns_server, domain))
+					print("{0}\t-DNS zone transfer successful for {1}{2}".format(green, dns_server, end))
+					write_to_file = open("{0}/dns/{1}.transfert".format(domain, dns_server), "w+")
+					write_to_file.write(output)
+					write_to_file.close()
+					print("{0}\t\tResults written in {1}/dns/{2}".format(red, domain, dns_server))
+				except  :
+					print("{0}\t{1} : failed.{2}".format(red, dns_server, end))
+	output_write = open("{0}/dns/dig".format(domain), "w+")
+	output_write.write(data)
+	output_write.close()
 	print("")
 	return
 
