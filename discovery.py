@@ -31,7 +31,7 @@ shodan_api_key = ""
 ############################################################################
 # Get WhatCMS API key by creating an account here : https://whatcms.org/API
 ############################################################################
-whatcms_api_key = "1"
+whatcms_api_key = ""
 
 #####################################################################
 # Get Hunter API key by creating an account here :https://hunter.io/
