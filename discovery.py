@@ -201,13 +201,14 @@ def get_domains(domain) :
 		sys.stdout = sys.__stdout__
 	domain_file = open("{0}/dns/{0}.domains".format(domain), "r")
 	domains = domain_file.readlines()
+	length = len(domains) + 1
 	domains.insert(0, domain + "\n")
 	domain_file.close()
 	domain_file = open("{0}/dns/{0}.domains".format(domain), "w")
 	domain_file.writelines(domains)
 	domain_file.close()
-	print("{0}\t Here are the found domains : \n\t-{1}{2}".format(green, "\t-".join(map(str, domains)), end))
-	print("\t{0}[!] Results of Sublist3r written in {1}/dns/{1}.domains{2}\n".format(red, domain, end))
+	print("{0}\t Here are the found domains : \n\t{1}{2}".format(green, "\t".join(map(str, domains)), end))
+	print("\t{0}[!] {1} found domains written in {2}/dns/{2}.domains{3}\n".format(red, str(length), domain, end))
 	return
 
 ##########################################################################
