@@ -113,7 +113,6 @@ All results will be written in a file in this tree :
 
 # To Do list :
  - Review try/except blocks
- - Add RIPE parsing to gather IP ranges
  - Add a quick description for each CVE detected by Shodan
  - Query HaveIBeenPowned API to gather statistics about pwned emails 
  - May be add some web scanner or API that detects flaws related to a certain CMS  
