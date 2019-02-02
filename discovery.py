@@ -180,6 +180,31 @@ def dns_info(domain, dns_servers):
 	print("")
 	return
 
+##############################################################################
+# This function will gather IP ranges belonging to a certain domain using ripe
+# databases
+##############################################################################
+def ripe(domain) :
+	print("{0}[#] Looking for IP ranges using ripe.net.{1}".format(white, end))
+	check = []
+	request = requests.get("http://rest.db.ripe.net/search?source=ripe&query-string={0}&flags=no-filtering&flags=no-referenced".format(domain.split(".")[0]), headers = {"Accept" : "application/xml"})
+	if request.status_code == 200 :
+		soup = BeautifulSoup(request.text, "lxml")
+		contents = soup.find_all("attribute", {"name":"inetnum"})
+		if len(contents) > 0 :
+			output_write = open("{0}/dns/ripe".format(domain), "w+")
+			for content in contents :
+				if content not in check :
+					check.append(content)
+					print("\t{0}".format(green) + content['value'] + "{0}".format(end))
+					output_write.write(content['value'] + "\n")
+			output_write.close()
+			print("\n\t{0}[!] IP ranges written in {1}/dns/ripe.{2}\n".format(red, domain, end))
+			return
+		else :
+			print("\t{0}No range found.{1}\n".format(red, end))
+			return 
+
 ############################################################################
 # This function will try to enumerate subdomains using Sublist3r tool. 
 # Depending of your wil, you can activate bruteforce module or not. Anyway, 
@@ -667,6 +692,7 @@ if args.dns :
 	dns_info(domain, dns)
 if args.subrute or args.sublist :
 	get_domains(domain)
+	ripe(domain)
 	from_domains_to_ips(domain)
 if args.scan :
 	scrape_shodan(domain)
