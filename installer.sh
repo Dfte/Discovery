@@ -16,4 +16,4 @@ cd
 #################
 # Required tools
 #################
-apt -y install sublist3r dig extract wafw00f exiftool
+apt -y install sublist3r dnsutils extract wafw00f exiftool
