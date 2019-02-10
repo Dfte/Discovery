@@ -4,8 +4,6 @@ Discovery is a fully automated OSINT tool that will gather informations from a l
 
 Discovery relies on 6 modules that can be used all at once or independently. All you need to have to launch the tool is a domain name :
 
-    python3 discovery.py -d "domain_name"
-
 ## Warning
 
 This tool relies on 4 FREE API's : 
