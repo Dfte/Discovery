@@ -6,11 +6,6 @@ Discovery relies on 6 modules that can be used all at once or independently. All
 
     python3 discovery.py -d "domain_name"
 
-
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/8.png">
-</p>
-
 ## Warning
 
 This tool relies on 4 FREE API's : 
