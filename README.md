@@ -109,18 +109,21 @@ All results will be written in a file in this tree :
 </p>
 
 # To Do list :
- - Query HaveIBeenPowned API to gather statistics about pwned emails 
- - May be add some web scanner or API that detects flaws related to a certain CMS  
- - Improve the scanning function for different services
- - Find a way to deal with Googles Captchas
- - Dynamic display for the document dowloads
- - add ip2host to detect new virtual hosts
- - check for reverse dns 
- - Check CN's in protocoles' certificates (ssh, ftps....)
- - Improve scanning phase
- - Add Http screenshot
- - Parse output of searchsploit results
- - Add UDP scans
- - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
- - Find aw ay to detect emails patterns
 
+ - Find a way to detect emails patterns
+     - Query HaveIBeenPowned API to gather statistics about pwned emails 
+ 
+ - Improve the scanning function for different services :
+     - May be add some web scanner or API that detects flaws related to a certain CMS  
+     - Add Http screenshot
+     - Parse output of searchsploit results
+      - Add UDP scans
+     
+ - Find a way to deal with Googles Captchas
+    - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
+ - Dynamic display for the document dowloads
+ 
+ -Add IP/domains discovery :
+     - add ip2host to detect new virtual hosts
+     - check for reverse dns 
+     - Check CN's in protocoles' certificates (ssh, ftps....)
