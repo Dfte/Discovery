@@ -119,5 +119,6 @@ All results will be written in a file in this tree :
  - Improve scanning phase
  - Add Http screenshot
  - Add searchsploit and thus nmap xml output
+ - Download sensitives files
 
 
