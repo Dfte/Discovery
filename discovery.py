@@ -80,15 +80,15 @@ end = "\033[m"
 # This function will print the banner
 ######################################
 def banner() :
-	print("""{0}                                                
-          |-|-|      |       
-            |        |		
+	print("""{0}
+          |-|-|      |
+            |        |
             '--|     |	    Written By Defte
-        _.-='  |\   /|\\	    
+        _.-='  |\   /|\\
        |    |  |-'-'-'-'-.   Twitter : https://twitter.com/DefteWFfr/
        |_.-='  '========='   Website : https://whiteflag.blog
-            `   |     |      Github  : https://github.com/Dfte         
-             `. |    / \\	
+            `   |     |      Github  : https://github.com/Dfte
+             `. |    / \\
                ||   /   \____.--=''''==--.._
                ||_.'--=='    |__  __  __  _.'
                ||  |    |    |\ ||  ||  || |                        ___
@@ -107,10 +107,10 @@ def banner() :
 	return
 
 ########################################################################
-# This function will gather informations from whois databases and parses 
+# This function will gather informations from whois databases and parses
 # the result to show you importants informations
 ########################################################################
-def get_whois(domain): 
+def get_whois(domain):
 	dns_servers = []
 	data = ""
 	print("{0}[#] Querying whois databases{1}".format(white, end))
@@ -128,7 +128,7 @@ def get_whois(domain):
 				data += "\t{0}Registrar : {1}{2}\n".format(green, str(values[value][0]), end)
 			if value == "contact" :
 				data += "\t{0}Contact : {1}{2}\n".format(green, str(values[value][0]), end)
-	print(data)	
+	print(data)
 	return dns_servers
 
 ################################################################################################
@@ -143,16 +143,16 @@ def dns_info(domain, dns_servers):
 			values = dns.resolver.query(domain, record)
 		except :
 			pass
-		if values : 
+		if values :
 			for value in values:
 				if record == "A" :
-					data += "\tRecord A    : {0}\n".format(value) 
+					data += "\tRecord A    : {0}\n".format(value)
 				if record == "AAAA" :
-					data += "\tRecord AAAA : {0}\n".format(value) 
+					data += "\tRecord AAAA : {0}\n".format(value)
 				if record == "MX" :
-					data += "\tRecord MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0]) 
+					data += "\tRecord MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0])
 				if record == "SOA" :
-					data += "\tRecord SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0]) 
+					data += "\tRecord SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0])
 				if record == "NS" :
 					data += "\tRecord NS   : {0}\n".format(str(value).rsplit(".", 1)[0])
 					if str(value).rsplit(".", 1)[0] not in dns_servers :
@@ -180,34 +180,9 @@ def dns_info(domain, dns_servers):
 	print("")
 	return
 
-##############################################################################
-# This function will gather IP ranges belonging to a certain domain using ripe
-# databases
-##############################################################################
-def ripe(domain) :
-	print("{0}[#] Looking for IP ranges using ripe.net.{1}".format(white, end))
-	check = []
-	request = requests.get("http://rest.db.ripe.net/search?source=ripe&query-string={0}&flags=no-filtering&flags=no-referenced".format(domain.split(".")[0]), headers = {"Accept" : "application/xml"})
-	if request.status_code == 200 :
-		soup = BeautifulSoup(request.text, "lxml")
-		contents = soup.find_all("attribute", {"name":"inetnum"})
-		if len(contents) > 0 :
-			output_write = open("{0}/dns/ripe".format(domain), "w+")
-			for content in contents :
-				if content not in check :
-					check.append(content)
-					print("\t{0}".format(green) + content['value'] + "{0}".format(end))
-					output_write.write(content['value'] + "\n")
-			output_write.close()
-			print("\n\t{0}[!] IP ranges written in {1}/dns/ripe.{2}\n".format(red, domain, end))
-			return
-		else :
-			print("\t{0}No range found.{1}\n".format(red, end))
-			return 
-
 ############################################################################
-# This function will try to enumerate subdomains using Sublist3r tool. 
-# Depending of your wil, you can activate bruteforce module or not. Anyway, 
+# This function will try to enumerate subdomains using Sublist3r tool.
+# Depending of your wil, you can activate bruteforce module or not. Anyway,
 # huge shout out to aboul3la for this tool !
 # Github : https://github.com/aboul3la/Sublist3r
 ############################################################################
@@ -226,14 +201,13 @@ def get_domains(domain) :
 		sys.stdout = sys.__stdout__
 	domain_file = open("{0}/dns/{0}.domains".format(domain), "r")
 	domains = domain_file.readlines()
-	length = len(domains) + 1
 	domains.insert(0, domain + "\n")
 	domain_file.close()
 	domain_file = open("{0}/dns/{0}.domains".format(domain), "w")
 	domain_file.writelines(domains)
 	domain_file.close()
-	print("{0}\t Here are the found domains : \n\t{1}{2}".format(green, "\t".join(map(str, domains)), end))
-	print("\t{0}[!] {1} found domains written in {2}/dns/{2}.domains{3}\n".format(red, str(length), domain, end))
+	print("{0}\t Here are the found domains : \n\t-{1}{2}".format(green, "\t-".join(map(str, domains)), end))
+	print("\t{0}[!] Results of Sublist3r written in {1}/dns/{1}.domains{2}\n".format(red, domain, end))
 	return
 
 ##########################################################################
@@ -263,49 +237,6 @@ def from_domains_to_ips(domain) :
 	print("\n\t{0}[!] IP's, domains and IP's to domains file written in {1}/dns/{2}\n".format(red, save_domain, end))
 	return
 
-##########################################################################
-# This function will gather informations from the shodan API's : detected 
-# servers, versions, CVE related to the possible flaws
-##########################################################################
-def scrape_shodan(domain):
-	print("{0}[#] Gathering informations from Shodan's API.{1}\n".format(white, end))
-	api = shodan.Shodan(shodan_api_key)
-	targets = open("{0}/dns/{0}.ips".format(domain), "r")
-	for target in targets :
-		target = target.replace("\n", "")
-		target = re.findall( r'[0-9]+(?:\.[0-9]+){3}', target)
-		try:
-			results = api.search(target[0])
-			if results["total"] == 0 :
-				pass
-			else :
-				for result in results["matches"]:
-					data = "{0}\tIP : {1}{2}\n".format(green, result["ip_str"], end)
-					if "product" in result and "version" in result :
-						data += "{0}\tServer : {1} {2}{3}\n".format(green, result["product"], result["version"], end)
-					if "location" in result and len(result["location"]["country_name"]) > 0 :
-						data += "{0}\tLocation : {1}{2}\n".format(green, result["location"]["country_name"], end)
-					if "vulns" in result and len(result["vulns"]) > 0 :
-						data += "{0}\tVulnérabilities : {1}\n".format(red, end)
-						for cve in result["vulns"] :
-							url = "https://www.cvedetails.com/cve/{0}".format(cve)
-							cve_details = requests.get(url)
-							if cve_details.status_code == 200 :
-								data += "\t       {0}-{1} : {2} {3}\n".format(red, cve , url, end)
-							else :
-								data += "\t	{0}-{1} : {2} {3}\n".format(red, cve, "No information found", end)
-					else :
-						data += "{0}\tNo vulnerabilties found...{1}\n".format(red, end)
-					print(data)
-					summary = open("{0}/shodan/{1}.shodan".format(domain, target[0]),"w+")
-					summary.write(data)
-					summary.close()
-			time.sleep(2)
-		except shodan.APIError as e:
-			pass
-	print("{0}\t[!] Reports written in {1}/shodan/{2}\n".format(red, domain, end))
-	return
-
 #############################################################################
 # This function will first launch a nmap scan on all ips/domains detected
 # or on the in scope domains/ips. Depending of the result a few others tools
@@ -321,11 +252,12 @@ def scanner(domain, level) :
 		warning_file = warning_file.replace("\n", "")
 		files.append(warning_file)
 	source_files.close()
-	print("{0}[#] Scanning found IP's {1}".format(white, end))
+	print("{0}[#] Scanning found IP's {1}\n".format(white, end))
 	ips = open("{0}/dns/{0}.ips".format(domain), "r")
 	ips = ips.readlines()
 	for ip in ips :
 		ip = ip.replace("\n", "")
+		os.system("mkdir {0}/scan/{1}".format(domain, ip))
 		nm = nmap.PortScanner()
 		if level == "full" :
 			print("{0}\tScanning {1} with Nmap (full scan){2}".format(white, ip, end))
@@ -335,7 +267,7 @@ def scanner(domain, level) :
 			nm.scan(ip, arguments = "-sV -F -Pn --open")
 		if len(nm.all_hosts()) > 0 :
 			for host in nm.all_hosts():
-				data = "\t{}----------------------------------------------------------------------------------------------------------{}\n".format(white, end)
+				data = "\t{0}----------------------------------------------------------------------------------{1}\n".format(white, end)
 				data += "\t{0}Host : {1} ({2}){3}\n".format(green, host, nm[host].hostname(), end)
 				data += "\t{0}State : {1}{2}\n".format(green, nm[host].state(), end)
 				for proto in nm[host].all_protocols():
@@ -349,66 +281,137 @@ def scanner(domain, level) :
 								url = "http://{0}:{1}/".format(ip, port)
 							if nm[host]["tcp"][int(port)]["name"] == "https" :
 								url = "https://{0}:{1}/".format(ip, port)
-							data += "\t{0}port : {1}{2}{3}\tstate : {4}\tService : {5} {6}/{7}{2}\n".format(red, port, end, white, nm[host][proto][port]["state"], nm[host][proto][port]["name"],\
+							data += "\t{0}port : {1}{2}{3}\tstate : {4}\tService : {5} {6}/{7}{2}\n".format(green, port, end, white, nm[host][proto][port]["state"], nm[host][proto][port]["name"],\
 																															nm[host]["tcp"][int(port)]["product"], nm[host][proto][port]['version'])
-							###WHATCMS
+							##########
+							# WHATCMS
+							##########
 							request =  requests.get("https://whatcms.org/APIEndpoint/Detect?key={0}&url={1}".format(whatcms_api_key, url))
 							if request.status_code == 200 :
 								cms_info = json.loads(request.text)
 								if cms_info["result"]["name"] is not None :
-									data +="\t\t{0}CMS detected : {1} (accuracy : {2}){3}\n".format(green, cms_info["result"]["name"], cms_info["result"]["confidence"], end)
-							###SSLSCAN
+									data +="\t\t{0}CMS detected : {1} (accuracy : {2}){3}\n".format(red, cms_info["result"]["name"], cms_info["result"]["confidence"], end)
+									#os.system("{0}/scan/{1}/cmsmap".format(domain, ip))
+									#Add CMSMAP SCAN RESULT
+							##########
+							# SSLscan
+							##########
 							if nm[host]["tcp"][int(port)]["name"] == "https" :
-								try: 
+								try:
 									output = check_output(["sslscan", "{0}".format(url)])
 									output = output.decode('ascii')
 									buf = io.StringIO(output).read()
 									if "is vulnerable to heartbleed" in buf :
 										data += "{0}\t\t Heartbleed vulnerability detected !{1}\n".format(red, end)
-									output_write = open("{0}/sslscan/{1}{2}\n".format(domain, ip, end), "w+")
+									os.system("mkdir {0}/scan/{1}/".format(domain, ip))
+									output_write = open("{0}/scan/{1}/sslscan".format(domain, ip), "w+")
 									output_write.write(buf)
 									output_write.close()
-									data += "\t\t{0}SSLscan saved in {1}/sslscan/{2}{3}\n".format(green, domain, ip, end)
+									data += "\t\t{0}SSLscan saved in {1}/scan/{2}/sslscan{3}\n".format(green, domain, ip, end)
 								except :
 									pass
 							###WAF DETECTION
-							try :
-								output = check_output(["wafw00f", "{0}".format(url)])
-								output = output.decode('ascii')
-								buf = io.StringIO(output).readlines()
-								if "No WAF detected by the generic detection" in buf :
-									data += "\t\t{0}No WAF detected{1}\n".format(green, end)
-								else :
-								
-									data += "\t\t{0}WAF detected ! Check output in {1}/scan/waf_detection{2}\n".format(red, domain, end)
-								output_write = open("{}/scan/waf_detection".format(domain), "w+")
-								output_write.writelines(buf)
-								output_write.close()
-							except :
-								pass
+							###DO SOMETHING BETTER
+							if whatcms_api_key is not "" :
+								try :
+									output = check_output(["wafw00f", "{0}".format(url)])
+									output = output.decode('ascii')
+									buf = io.StringIO(output).readlines()
+									if "No WAF detected" in buf :
+										data += "\t\t{0}No WAF detected{1}\n".format(green, end)
+									else :
+										data += "\t\t{0}WAF detected ! Check output in {1}/scan/{2}/waf_detection{3}\n".format(red, domain, ip, end)
+									output_write = open("{0}/scan/{1}/waf_detection".format(domain, ip), "w+")
+									output_write.writelines(buf)
+									output_write.close()
+								except :
+									pass
+							###Detection of sensitive files
+							###BUGGUED
 							for important_file in files :
 								request =  requests.get(url + "{0}".format(important_file))
 								if request.status_code == 200 :
-									data += "\t\t{0}Found {1} file on {2}:{3}/{1}{4}\n".format(red, important_file, ip, port, end)
+									data += "\t\t{0}Found {1} file on {2}:{3}/{1} -> downloaded !{4}\n".format(red, important_file, ip, port, end)
+									os.system("mkdir {0}/scan/{1}/sensitive_files/".format(domain, ip))
+									if important_file == ".git" :
+										important_file = "git"
+									write_to = open("{0}/scan/{1}/sensitive_files/{2}".format(domain, ip, important_file), "w+")
+									write_to.write(request.text)
+									write_to.close()
 						else :
-							data += "\t{0}port : {1}{2}\t{4}state : {3}\tService : {5}/{6}{2}\n".format(red, port, end, nm[host][proto][port]["state"], white, nm[host]["tcp"][int(port)]["product"], \
+							data += "\t{0}port : {1}{2}\t{4}state : {3}\tService : {5}/{6}{2}\n".format(green, port, end, nm[host][proto][port]["state"], white, nm[host]["tcp"][int(port)]["product"], \
 																																								nm[host]["tcp"][int(port)]["version"])
-		else :
-			data += "\t{0}No up host found...{1}\n".format(red, end)
-		data += "\t{0}----------------------------------------------------------------------------------------------------------{1}\n".format(white, end)
-		print(data)
-		written_to = open("{0}/scan/{1}.nmap".format(domain, ip), "w")
-		written_to.write(data)
-		written_to.close()
-		print("\n\t{0}[!] Results written in {1}/scan/{2}.nmap{3}\n".format(red,domain, ip, end))
-		break
-	return 
+			data += "\t{0}----------------------------------------------------------------------------------{1}".format(white, end)
+			print(data)
+			written_to = open("{0}/scan/{1}/nmap.txt".format(domain, ip), "w+")
+			written_to.write(data)
+			written_to.close()
+			written_to = open("{0}/scan/{1}/nmap.xml".format(domain, ip), "w+")
+			written_to.write(nm.get_nmap_last_output())
+			written_to.close()
+			##############
+			#Searchsploit
+			##############
+			output = check_output(["searchsploit", "-e", "--nmap", "{0}/scan/{1}/nmap.xml".format(domain, ip)], stderr = subprocess.STDOUT)
+			output = output.decode('ascii')
+			buf = io.StringIO(output).read()
+			written_to = open("{0}/scan/{1}/searchsploit".format(domain, ip), "w+")
+			written_to.write(buf)
+			written_to.close()
+		print("\n\t{0}[!] Text and xml output written in {1}/scan/{2}/{3}\n".format(red,domain, ip, end))	
+	return
 
 ##########################################################################
-# This function will crawl as much as possible Google to gather files 
+# This function will gather informations from the shodan API's : detected
+# servers, versions, CVE related to the possible flaws
+##########################################################################
+def scrape_shodan(domain):
+	print("{0}[#] Gathering informations from Shodan's API.{1}\n".format(white, end))
+	data = ""
+	api = shodan.Shodan(shodan_api_key)
+	targets = open("{0}/dns/{0}.ips".format(domain), "r")
+	for target in targets :
+		target = target.replace("\n", "")
+		target = re.findall( r'[0-9]+(?:\.[0-9]+){3}', target)
+		try:
+			results = api.search(target[0])
+			if results["total"] == 0 :
+				pass
+			else :
+				for result in results["matches"]:
+					data += "{0}\n\tIP : {1}{2}\n".format(green, result["ip_str"], end)
+					if "product" in result and "version" in result :
+						data += "{0}\tServer : {1} {2}{3}\n".format(green, result["product"], result["version"], end)
+					if "location" in result and len(result["location"]["country_name"]) > 0 :
+						data += "{0}\tLocation : {1}{2}\n".format(green, result["location"]["country_name"], end)
+					if "vulns" in result and len(result["vulns"]) > 0 :
+						data += "{0}\tVulnérabilities : {1}\n".format(red, end)
+						##################
+						# Will be updated
+						##################
+						for cve in result["vulns"] :
+							url = "https://www.cvedetails.com/cve/{0}".format(cve)
+							cve_details = requests.get(url)
+							if cve_details.status_code == 200 :
+								data += "\t       {0}-{1} : {2} {3}\n".format(red, cve , url, end)
+							else :
+								data += "\t	{0}-{1} : {2} {3}\n".format(red, cve, "No information found", end)
+					else :
+						data += "{0}\tNo vulnerabilties found...{1}\n".format(red, end)
+					print(data)
+		except shodan.APIError as e:
+			pass
+	summary = open("{0}/scan/{1}/shodan".format(domain, target[0]),"w+")
+	summary.write(data)
+	summary.close()
+	print("{0}\t[!] Reports written in {1}/scan/{2}/shodan{3}\n".format(red, domain, target[0], end))
+	return
+
+##########################################################################
+# This function will crawl as much as possible Google to gather files
 # publicly exposed by the domain you're looking for. It will retrieve pdf
 # xls, docx, doc and so on... And will then try to parse the documents to
-# gather sensitives datas. This function is partially inspired from the 
+# gather sensitives datas. This function is partially inspired from the
 # pyfoca script written by altjx
 # Github : https://github.com/altjx/ipwn/tree/master/pyfoca
 ###########################################################################
@@ -448,7 +451,7 @@ def documents_gathering(domain, max_scrape):
 				for url in found_urls :
 					if url not in links :
 						links.append(url)
-						found += 1 
+						found += 1
 						name_file = url.split("/")[-1]
 						name_file = name_file.split("{0}&".format(ext))[0]
 						files.append(name_file)
@@ -495,8 +498,8 @@ def documents_gathering(domain, max_scrape):
 	return
 
 #######################################################################
-# This function will use the exiftool librairye extract metadatas from 
-# files. Gather author name, software used to create the file and 
+# This function will use the exiftool librairye extract metadatas from
+# files. Gather author name, software used to create the file and
 # the name/date of the last save.
 ######################################################################
 def parse(domain, path, name) :
@@ -506,7 +509,7 @@ def parse(domain, path, name) :
 	output = check_output(["exiftool", "-j", "{0}".format(path)])
 	output = json.loads(output)
 	output_write = open("{0}/document/metadatas_full/{1}".format(domain, name), "w+")
-	for info, value in output[0].items() : 
+	for info, value in output[0].items() :
 		if "Author" in str(info) and str(value) not in author :
 			author.append(str(value))
 		if "Software" in str(info) and str(value) not in software :
@@ -517,13 +520,13 @@ def parse(domain, path, name) :
 	output_write.close()
 
 #########################################################################
-# This function will look on hunter.io API to find emails related to the 
+# This function will look on hunter.io API to find emails related to the
 # domain you're working on.
 #########################################################################
 def hunter(domain) :
 	print("{}[#] Querying hunter.io API.{}\n".format(white, end))
 	output_write = open("{0}/harvest/hunter".format(domain), "w+")
-	request = requests.get("https://api.hunter.io/v2/domain-search?domain={0}&api_key={1}".format(domain, hunter_api_key))	
+	request = requests.get("https://api.hunter.io/v2/domain-search?domain={0}&api_key={1}".format(domain, hunter_api_key))
 	if request.status_code == 200 :
 		results = json.loads(request.text)
 		for item in results["data"]["emails"] :
@@ -534,10 +537,10 @@ def hunter(domain) :
 	return
 
 #########################################################################
-# This function will look on rocketreach API to gather names of employee 
+# This function will look on rocketreach API to gather names of employee
 #  working for the company you're gathering informations on. Then it will
 # parse the output to create a list of names that will be used later.
-# Shoutout to my friend N3tsky who wrote the orgininal API parser script 
+# Shoutout to my friend N3tsky who wrote the orgininal API parser script
 # that i took as an exemple to create this function :
 # Github : https://github.com/n3tsky/PeopleScrap
 #########################################################################
@@ -564,7 +567,7 @@ def rocketreach(domain) :
 
 #############################################################################
 # This function will create a list of emails from the previously found names
-# In order for it to work, the script must first detect the pattern of an 
+# In order for it to work, the script must first detect the pattern of an
 # original and validated emails of the company so that there are no mistakes
 #############################################################################
 def mail_list_creator(domain) :
@@ -580,7 +583,7 @@ def mail_list_creator(domain) :
 		isascii = lambda name: len(name) == len(name.encode())
 		#######################################################
 		if name != "" and isascii(name) == True :
-			name = name.lower()	
+			name = name.lower()
 			try :
 				firstname, lastname, *rest = name.split(" ")
 			except :
@@ -590,10 +593,10 @@ def mail_list_creator(domain) :
 				lastname_firstname.append("{0}.{1}@{2}".format(lastname, firstname, domain))
 				flastname.append("{0}{1}@{2}".format(firstname[0], lastname, domain))
 				lfirstname.append("{0}{1}@{2}".format(lastname[0], firstname, domain))
-	return 
+	return
 
 ##########################################################################
-# This function will write all names/emails found on files in the harvest 
+# This function will write all names/emails found on files in the harvest
 # directory.
 ##########################################################################
 def write_all(domain) :
@@ -634,14 +637,14 @@ def interruptHandler(signal, frame):
 
 def signature() :
 	print('''{0}
-         _          _     _       __                                           _ 
+         _          _     _       __                                           _
    /\/\ (_)___  ___| |__ (_) ___ / _|   /\/\   __ _ _ __   __ _  __ _  ___  __| |
   /    \| / __|/ __| '_ \| |/ _ \ |_   /    \ / _` | '_ \ / _` |/ _` |/ _ \/ _` |
  / /\/\ \ \__ \ (__| | | | |  __/  _| / /\/\ \ (_| | | | | (_| | (_| |  __/ (_| |
  \/    \/_|___/\___|_| |_|_|\___|_|   \/    \/\__,_|_| |_|\__,_|\__, |\___|\__,_|
-                                                                |___/            
+                                                                |___/
 	{1}'''.format(red,end))
-	return 
+	return
 
 #######################
 # Clearing the terminal
@@ -677,29 +680,29 @@ if os.path.isdir(current_dir + "/" + domain) :
 	pass
 else :
 	os.system("mkdir {0}".format(domain))
-	os.system("mkdir {0}/dns {0}/document {0}/harvest {0}/scan {0}/shodan {0}/sslscan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
+	os.system("mkdir {0}/dns {0}/document {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
 	extensions = open("configuration/extensions").readlines()
 	for ext in extensions :
 		ext = ext.replace("\n", "")
-		os.system("mkdir {0}/document/{1}".format(domain, ext))	
+		os.system("mkdir {0}/document/{1}".format(domain, ext))
 
 #######################################
 # That's basically the script backbone
 #######################################
 #try :
 if args.dns :
-	dns = get_whois(domain)
-	dns_info(domain, dns)
+	dns_servers = get_whois(domain)
+	dns_info(domain, dns_servers)
 if args.subrute or args.sublist :
 	get_domains(domain)
-	ripe(domain)
 	from_domains_to_ips(domain)
 if args.scan :
-	scrape_shodan(domain)
 	scanner(domain, args.scan)
+	if shodan_api_key is not "" :
+		scrape_shodan(domain)
 if args.gather :
 	documents_gathering(domain, args.gather)
-if args.harvest :
+if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
 	mail_list_creator(domain)
@@ -708,6 +711,6 @@ if args.harvest :
 #	print("{0}[!] An error occured... Please contact me and paste the following trace so that I can fix it :) !\n{1}".format(red, end))
 
 ############################
-# Print signature banner :D 
+# Print signature banner :D
 ############################
 signature()
