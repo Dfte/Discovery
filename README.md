@@ -54,7 +54,7 @@ This module is composed of two functions and can be called that way :
 
 The first function is an implementaiton of the python nmap librairy. It will scan the discovered IP's either the "full" way (which means it will check for the all 65535 ports) or the "fast" way (-F nmap option).
 
-Depending of the services discovered it will perform a few actions. Actually I only took care of the HTTP/HTTPS services. So the script will check the SSL certificate, check for the CMS used (if there is one), check for comon important files (.git, /status, trace.axd, robots.txt).
+Depending of the services discovered it will perform a few actions. Actually I only took care of the HTTP/HTTPS services. So the script will check the SSL certificate, check for the CMS used (if there is one), check for comon important files (.git, /status, trace.axd, robots.txt. If those files are found, they will be downloaded).
 
 <p align="center">
 <img src="https://github.com/Dfte/Discovery/blob/master/images/6.png">
@@ -63,6 +63,8 @@ Depending of the services discovered it will perform a few actions. Actually I o
 >Note : you can add as much files as you want in the "warning_file" file in the configuration directory.
 
 It will also look for potential WAF using the wafwoof tool developped by EnableSecurity : https://github.com/EnableSecurity/wafw00f
+
+The tool will output an XML files that will be used with searchsploit in order to present you some exploits. (I still have to work on parsing the output of searchsploit but hey... This is coming soon :) )
 
 The second function will use the Shodan API to gather informations about the domain name : found servers, services, CVE's related to the services and so on...
 <p align="center">
@@ -120,7 +122,5 @@ All results will be written in a file in this tree :
  - Check CN's in protocoles' certificates (ssh, ftps....)
  - Improve scanning phase
  - Add Http screenshot
- - Add searchsploit and thus nmap xml output
- - Download sensitives files
 
 
