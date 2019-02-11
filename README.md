@@ -109,8 +109,6 @@ All results will be written in a file in this tree :
 </p>
 
 # To Do list :
- - Review try/except blocks
- - Add a quick description for each CVE detected by Shodan
  - Query HaveIBeenPowned API to gather statistics about pwned emails 
  - May be add some web scanner or API that detects flaws related to a certain CMS  
  - Improve the scanning function for different services
