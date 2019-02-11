@@ -122,5 +122,6 @@ All results will be written in a file in this tree :
  - Check CN's in protocoles' certificates (ssh, ftps....)
  - Improve scanning phase
  - Add Http screenshot
+ - Parse output of searchsploit results
 
 
