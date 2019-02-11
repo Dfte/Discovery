@@ -117,6 +117,5 @@ All results will be written in a file in this tree :
  - check for reverse dns 
  - Check CN's in protocoles' certificates (ssh, ftps....)
  - Improve scanning phase
- - Ouput all files to a certain directory (--output)
 
 
