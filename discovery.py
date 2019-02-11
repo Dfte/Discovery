@@ -101,7 +101,7 @@ def banner() :
  |   8I  Yb 88 `Ybo." dP   `" dP   Yb  Yb  dP  88__   88__dP  YbdP   /
  |   8I  dY 88 o.`Y8b Yb      Yb   dP   YbdP   88""   88"Yb    8P   /
  |  8888Y"  88 8bodP'  YboodP  YbodP     YP    888888 88  Yb  dP   /
- |= 1602 ============================================== v1.2 =====/
+ |= 1602 ============================================== v1.0 =====/
  '----------------------------------------------------------------`
 		{1}""".format(yellow, end))
 	return
@@ -286,13 +286,14 @@ def scanner(domain, level) :
 							##########
 							# WHATCMS
 							##########
-							request =  requests.get("https://whatcms.org/APIEndpoint/Detect?key={0}&url={1}".format(whatcms_api_key, url))
-							if request.status_code == 200 :
-								cms_info = json.loads(request.text)
-								if cms_info["result"]["name"] is not None :
-									data +="\t\t{0}CMS detected : {1} (accuracy : {2}){3}\n".format(red, cms_info["result"]["name"], cms_info["result"]["confidence"], end)
-									#os.system("{0}/scan/{1}/cmsmap".format(domain, ip))
-									#Add CMSMAP SCAN RESULT
+							if whatcms_api_key is not "" :
+								request =  requests.get("https://whatcms.org/APIEndpoint/Detect?key={0}&url={1}".format(whatcms_api_key, url))
+								if request.status_code == 200 :
+									cms_info = json.loads(request.text)
+									if cms_info["result"]["name"] is not None :
+										data +="\t\t{0}CMS detected : {1} (accuracy : {2}){3}\n".format(red, cms_info["result"]["name"], cms_info["result"]["confidence"], end)
+										#os.system("{0}/scan/{1}/cmsmap".format(domain, ip))
+										#Add CMSMAP SCAN RESULT
 							##########
 							# SSLscan
 							##########
@@ -312,20 +313,19 @@ def scanner(domain, level) :
 									pass
 							###WAF DETECTION
 							###DO SOMETHING BETTER
-							if whatcms_api_key is not "" :
-								try :
-									output = check_output(["wafw00f", "{0}".format(url)])
-									output = output.decode('ascii')
-									buf = io.StringIO(output).readlines()
-									if "No WAF detected" in buf :
-										data += "\t\t{0}No WAF detected{1}\n".format(green, end)
-									else :
-										data += "\t\t{0}WAF detected ! Check output in {1}/scan/{2}/waf_detection{3}\n".format(red, domain, ip, end)
-									output_write = open("{0}/scan/{1}/waf_detection".format(domain, ip), "w+")
-									output_write.writelines(buf)
-									output_write.close()
-								except :
-									pass
+							
+							try :
+								output = check_output(["wafw00f", "{0}".format(url)])
+								output = output.decode('ascii')
+								if "No WAF detected" in output :
+									data += "\t\t{0}No WAF detected{1}\n".format(green, end)
+								else :
+									data += "\t\t{0}WAF detected ! Check output in {1}/scan/{2}/waf_detection{3}\n".format(red, domain, ip, end)
+								output_write = open("{0}/scan/{1}/waf_detection".format(domain, ip), "w+")
+								output_write.write(output)
+								output_write.close()
+							except :
+								pass
 							###Detection of sensitive files
 							###BUGGUED
 							for important_file in files :
@@ -698,8 +698,8 @@ if args.subrute or args.sublist :
 	from_domains_to_ips(domain)
 if args.scan :
 	scanner(domain, args.scan)
-	if shodan_api_key is not "" :
-		scrape_shodan(domain)
+	#if shodan_api_key is not "" :
+	#	scrape_shodan(domain)
 if args.gather :
 	documents_gathering(domain, args.gather)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
