@@ -379,26 +379,28 @@ def scrape_shodan(domain):
 				pass
 			else :
 				for result in results["matches"]:
-					data += "{0}\n\tIP : {1}{2}\n".format(green, result["ip_str"], end)
+					data += "{0}\tIP : {1}{2}\n".format(green, result["ip_str"], end)
 					if "product" in result and "version" in result :
 						data += "{0}\tServer : {1} {2}{3}\n".format(green, result["product"], result["version"], end)
 					if "location" in result and len(result["location"]["country_name"]) > 0 :
 						data += "{0}\tLocation : {1}{2}\n".format(green, result["location"]["country_name"], end)
 					if "vulns" in result and len(result["vulns"]) > 0 :
 						data += "{0}\tVulnérabilities : {1}\n".format(red, end)
-						##################
-						# Will be updated
-						##################
 						for cve in result["vulns"] :
 							url = "https://www.cvedetails.com/cve/{0}".format(cve)
 							cve_details = requests.get(url)
 							if cve_details.status_code == 200 :
-								data += "\t       {0}-{1} : {2} {3}\n".format(red, cve , url, end)
+								soup = BeautifulSoup(cve_details.text, 'html.parser')
+								desc = soup.find("div", {"class" : "cvedetailssummary" })
+								desc = re.sub(r'\n\s*\n', r'\n\n', desc.get_text().strip(), flags = re.M)
+								desc = desc.split("\n")[0]
+								data += "\t       {0}{1} : {2}\n\t\t{3}{4} {5}\n\n".format(red, cve , url, white, "\n\t\t".join(textwrap.wrap(desc, width = 80)),  end)
 							else :
-								data += "\t	{0}-{1} : {2} {3}\n".format(red, cve, "No information found", end)
+								data += "\t	{0}-{1} : {2} {3}\n\n".format(red, cve, "No information found", end)
 					else :
-						data += "{0}\tNo vulnerabilties found...{1}\n".format(red, end)
+						data += "{0}\tNo vulnerabilities found...{1}\n\n".format(red, end)
 					print(data)
+					#break
 		except shodan.APIError as e:
 			pass
 	summary = open("{0}/scan/{1}/shodan".format(domain, target[0]),"w+")
