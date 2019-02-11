@@ -118,6 +118,6 @@ All results will be written in a file in this tree :
  - Check CN's in protocoles' certificates (ssh, ftps....)
  - Improve scanning phase
  - Add Http screenshot
- - Add searhcsploit
+ - Add searchsploit and thus nmap xml output
 
 
