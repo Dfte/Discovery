@@ -124,5 +124,5 @@ All results will be written in a file in this tree :
  - Add Http screenshot
  - Parse output of searchsploit results
  - Add UDP scans
-
+ - Add the possibility to use modules with a list of domains (to gather emails for multiples domains for example)
 
