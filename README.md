@@ -121,9 +121,9 @@ All results will be written in a file in this tree :
      
  - Find a way to deal with Googles Captchas
     - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
- - Dynamic display for the document dowloads
+ - Dynamic display for the document dowloads (almost done :D )
  
  -Add IP/domains discovery :
-     - add ip2host to detect new virtual hosts
-     - check for reverse dns 
-     - Check CN's in protocoles' certificates (ssh, ftps....)
+    - add ip2host to detect new virtual hosts
+    - check for reverse dns 
+    - Check CN's in protocoles' certificates (ssh, ftps....)
