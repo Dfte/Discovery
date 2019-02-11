@@ -116,7 +116,6 @@ All results will be written in a file in this tree :
  - Improve the scanning function for different services
  - Find a way to deal with Googles Captchas
  - Dynamic display for the document dowloads
- - Bug in the scanning function (warning files detected whereas they souldn't)
  - add ip2host to detect new virtual hosts
  - check for reverse dns 
  - Check CN's in protocoles' certificates (ssh, ftps....)
