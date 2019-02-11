@@ -2,7 +2,7 @@
 
 Discovery is a fully automated OSINT tool that will gather informations from a lot of differents sources. Actually this is the beta test version :) !
 
-Discovery relies on 6 modules that can be used all at once or independently. All you need to have to launch the tool is a domain name :
+Discovery relies on 6 modules that can be used all at once or independently. All you need to have to launch the tool is a domain name.
 
 ## Warning
 
