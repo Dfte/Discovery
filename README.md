@@ -12,7 +12,9 @@ This tool relies on 4 FREE API's :
 - Hunter.io : https://hunter.io/
 - RocketReach : https://rocketreach.co/api 
 
-Most of the functions won't work without API keys.
+BUT !
+
+With Discovery v1.2 you can now use a huge part of the tool even without the API keys. Note that you wull not be able to use the harvester module nor the shodan and whatCMS api.
 
 ## Whois/DNS request
 
