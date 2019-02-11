@@ -7,10 +7,10 @@ Discovery relies on 6 modules that can be used all at once or independently. All
 ## Warning
 
 This tool relies on 4 FREE API's : 
-Shodan : https://www.shodan.io/
-WhatCMS : https://whatcms.org/API
-Hunter.io : https://hunter.io/
-RocketReach : https://rocketreach.co/api 
+- Shodan : https://www.shodan.io/
+- WhatCMS : https://whatcms.org/API
+- Hunter.io : https://hunter.io/
+- RocketReach : https://rocketreach.co/api 
 
 Most of the functions won't work without API keys.
 
