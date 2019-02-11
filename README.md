@@ -123,5 +123,6 @@ All results will be written in a file in this tree :
  - Improve scanning phase
  - Add Http screenshot
  - Parse output of searchsploit results
+ - Add UDP scans
 
 
