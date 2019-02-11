@@ -122,4 +122,5 @@ All results will be written in a file in this tree :
  - Parse output of searchsploit results
  - Add UDP scans
  - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
+ - Find aw ay to detect emails patterns
 
