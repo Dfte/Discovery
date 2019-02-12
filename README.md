@@ -124,7 +124,7 @@ All results will be written in a file in this tree :
  - Dynamic display for the document dowloads (almost done :D )
  - Threader le download de fichiers
  
- -Add IP/domains discovery :
+ - Add IP/domains discovery :
     - add ip2host to detect new virtual hosts
     - check for reverse dns 
     - Check CN's in protocoles' certificates (ssh, ftps....)
