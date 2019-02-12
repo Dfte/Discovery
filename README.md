@@ -117,7 +117,6 @@ All results will be written in a file in this tree :
      - Add Http screenshot
      - Add UDP scans
      
- - Dynamic display for the document dowloads (almost done :D )
  - Threader le download de fichiers
  
  - Add IP/domains discovery :
