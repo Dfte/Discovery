@@ -115,7 +115,6 @@ def get_whois(domain):
 	data = ""
 	print("{0}[#] Querying whois databases{1}".format(white, end))
 	values = pythonwhois.get_whois(domain)
-	print(values)
 	if len(values) > 0 :
 		for value in values :
 			if value == "nameservers":
@@ -129,6 +128,8 @@ def get_whois(domain):
 			if value == "contact" :
 				data += "\t{0}Contact : {1}{2}\n".format(green, str(values[value][0]), end)
 	print(data)
+	output_write = open("{0}/whois/results".format(domain), "w+")
+	print("{0}\t[!] Whois informations written in {1}/whois/results{2}\n".format(red, domain, end))
 	return dns_servers
 
 ################################################################################################
@@ -204,10 +205,16 @@ def get_domains(domain) :
 	domains.insert(0, domain + "\n")
 	domain_file.close()
 	domain_file = open("{0}/dns/{0}.domains".format(domain), "w")
+	for line in domains :
+		if line.startswith("www.") :
+			wwwless = line.split("www.")[1]
+			domains.remove(line)
+			domains.append(wwwless)
+	domains = set(domains)
 	domain_file.writelines(domains)
 	domain_file.close()
-	print("{0}\t Here are the found domains : \n\t-{1}{2}".format(green, "\t-".join(map(str, domains)), end))
-	print("\t{0}[!] Results of Sublist3r written in {1}/dns/{1}.domains{2}\n".format(red, domain, end))
+	print("{0}\tFound {1} domains : \n\t{2}{3}".format(green, len(domains), "\t".join(map(str, domains)), end))
+	print("\t{0}[!] List of {1} domains written in {1}/dns/{1}.domains{2}\n".format(red, len(domains), domain, end))
 	return
 
 ##########################################################################
@@ -281,8 +288,7 @@ def scanner(domain, level) :
 								url = "http://{0}:{1}/".format(ip, port)
 							if nm[host]["tcp"][int(port)]["name"] == "https" :
 								url = "https://{0}:{1}/".format(ip, port)
-							data += "\t{0}port : {1}{2}{3}\tstate : {4}\tService : {5} {6}/{7}{2}\n".format(green, port, end, white, nm[host][proto][port]["state"], nm[host][proto][port]["name"],\
-																															nm[host]["tcp"][int(port)]["product"], nm[host][proto][port]['version'])
+							data += "\t{0}port : {1}{2}{3}\tstate : {4}\tService : {5} {6}/{7}{2}\n".format(green, port, end, white, nm[host][proto][port]["state"], nm[host][proto][port]["name"], nm[host]["tcp"][int(port)]["product"], nm[host][proto][port]['version'])
 							##########
 							# WHATCMS
 							##########
@@ -292,8 +298,6 @@ def scanner(domain, level) :
 									cms_info = json.loads(request.text)
 									if cms_info["result"]["name"] is not None :
 										data +="\t\t{0}CMS detected : {1} (accuracy : {2}){3}\n".format(red, cms_info["result"]["name"], cms_info["result"]["confidence"], end)
-										#os.system("{0}/scan/{1}/cmsmap".format(domain, ip))
-										#Add CMSMAP SCAN RESULT
 							##########
 							# SSLscan
 							##########
@@ -311,9 +315,9 @@ def scanner(domain, level) :
 									data += "\t\t{0}SSLscan saved in {1}/scan/{2}/sslscan{3}\n".format(green, domain, ip, end)
 								except :
 									pass
+							#################
 							###WAF DETECTION
-							###DO SOMETHING BETTER
-							
+							#################
 							try :
 								output = check_output(["wafw00f", "{0}".format(url)])
 								output = output.decode('ascii')
@@ -326,21 +330,21 @@ def scanner(domain, level) :
 								output_write.close()
 							except :
 								pass
+							################################
 							###Detection of sensitive files
-							###BUGGUED
+							################################
 							for important_file in files :
 								request =  requests.get(url + "{0}".format(important_file))
 								if request.status_code == 200 :
-									data += "\t\t{0}Found {1} file on {2}:{3}/{1} -> downloaded !{4}\n".format(red, important_file, ip, port, end)
+									data += "\t\t{0}Found {1} file on {2}{1} -> downloaded !{3}\n".format(red, important_file, url, end)
 									os.system("mkdir {0}/scan/{1}/sensitive_files/".format(domain, ip))
-									if important_file == ".git" :
-										important_file = "git"
+									if important_file.startswith(".") :
+										important_file = important_file.split(".")[1]
 									write_to = open("{0}/scan/{1}/sensitive_files/{2}".format(domain, ip, important_file), "w+")
 									write_to.write(request.text)
 									write_to.close()
 						else :
-							data += "\t{0}port : {1}{2}\t{4}state : {3}\tService : {5}/{6}{2}\n".format(green, port, end, nm[host][proto][port]["state"], white, nm[host]["tcp"][int(port)]["product"], \
-																																								nm[host]["tcp"][int(port)]["version"])
+							data += "\t{0}port : {1}{2}\t{4}state : {3}\tService : {5}/{6}{2}\n".format(green, port, end, nm[host][proto][port]["state"], white, nm[host]["tcp"][int(port)]["product"], nm[host]["tcp"][int(port)]["version"])
 			data += "\t{0}----------------------------------------------------------------------------------{1}".format(white, end)
 			print(data)
 			written_to = open("{0}/scan/{1}/nmap.txt".format(domain, ip), "w+")
@@ -349,16 +353,6 @@ def scanner(domain, level) :
 			written_to = open("{0}/scan/{1}/nmap.xml".format(domain, ip), "w+")
 			written_to.write(nm.get_nmap_last_output())
 			written_to.close()
-			##############
-			#Searchsploit
-			##############
-			output = check_output(["searchsploit", "-e", "--nmap", "{0}/scan/{1}/nmap.xml".format(domain, ip)], stderr = subprocess.STDOUT)
-			output = output.decode('ascii')
-			buf = io.StringIO(output).read()
-			written_to = open("{0}/scan/{1}/searchsploit".format(domain, ip), "w+")
-			written_to.write(buf)
-			written_to.close()
-		print("\n\t{0}[!] Text and xml output written in {1}/scan/{2}/{3}\n".format(red,domain, ip, end))	
 	return
 
 ##########################################################################
@@ -395,18 +389,17 @@ def scrape_shodan(domain):
 								if desc is not None :
 									desc = re.sub(r'\n\s*\n', r'\n\n', desc.get_text().strip(), flags = re.M)
 									desc = desc.split("\n")[0]
-									data += "\t\t{0}{1} : {2}\n\t\t{3}{4} {5}\n\n".format(red, cve , url, white, "\n\t\t".join(textwrap.wrap(desc, width = 80)),  end)
+									data += "\t\t{0}{1} : {2}\n\t\t{3}{4} {5}\n\n".format(red, cve , url, white, "\n\t\t".join(textwrap.wrap(desc, width = 60)),  end)
 								else :
 									data += "\t\t{0}{1} : {2} {3}\n\n".format(red, cve, "No informations found", end)
 							else :
 								data += "\t{0}{1} : {2} {3}\n\n".format(red, cve, "No information found", end)
 					else :
 						data += "{0}\tNo vulnerabilities found...{1}\n\n".format(red, end)
-					#break
 		except shodan.APIError as e:
 			pass
 	print(data)
-	summary = open("{0}/scan/{1}/shodan".format(domain, target[0]),"w+")
+	summary = open("{0}/shodan/results".format(domain),"w+")
 	summary.write(data)
 	summary.close()
 	print("{0}\t[!] Reports written in {1}/scan/{2}/shodan{3}\n".format(red, domain, target[0], end))
@@ -447,7 +440,7 @@ def documents_gathering(domain, max_scrape):
 			query = "https://www.google.com/search?q=site:{0}+ext:{1}&start={2}&num=100".format(domain, ext, count)
 			request = requests.get(query, headers = headers)
 			if request.status_code == 503 :
-				print("\t{0}[!] We got blocked by Google stopping the crawl...{1}\n".format(red, end))
+				print("\n\t{0}[!] We got blocked by Google stopping the crawl...{1}\n".format(red, end))
 				return
 			soup = BeautifulSoup(request.text, 'html.parser')
 			urls_pattern = "(?P<url>https?://[^:]+\.%s)" % ext
@@ -460,16 +453,21 @@ def documents_gathering(domain, max_scrape):
 						name_file = url.split("/")[-1]
 						name_file = name_file.split("{0}&".format(ext))[0]
 						files.append(name_file)
-						request = requests.get(url, stream=True)
+						request = requests.get(url, stream = True)
 						file_path = "{0}/document/{1}/{2}".format(save_domain, ext, name_file)
 						write_file = open(file_path, "wb+")
 						for chunk in request.iter_content(4096):
 							write_file.write(chunk)
 						write_file.close()
 						parse(save_domain, file_path, name_file)
+						sys.stdout.write('\r')
+						sys.stdout.write("{0}\tDownloaded {1} over {2} {3} files{4}\n".format(green, found, len(found_urls), ext, end))
+						sys.stdout.flush()
 				time.sleep(randint(20, 30))
+				found = 0
+				found_urls = 0
 				if count == 0 :
-					count +=2
+					count += 2
 				else :
 					count += 1
 				buttons = soup.findAll("a", {"class" : "fl" })
@@ -479,9 +477,9 @@ def documents_gathering(domain, max_scrape):
 					page.append(button)
 				if str(count) not in page :
 					break
-			except :
+			except Exception as e :
+				print(e)
 				pass
-		print("{0}\t-Discovered {1} {2} file(s).{3}".format(green, found, ext, end))
 	print("\n\t{0}[!] {1} documents downloaded and stored in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
 	list_name.close()
 	if len(author) > 0 :
@@ -499,7 +497,7 @@ def documents_gathering(domain, max_scrape):
 		for last in last_save :
 			output_write.write(last + "\n")
 		output_write.close()
-	print("{0}\t[!] Full and resumed metadatas reports stored in : {1}/document/metadata_*.{2}\n".format(red, save_domain, end))
+	print("{0}\t[!] Full and summarized metadatas reports stored in : {1}/document/metadata_*.{2}\n".format(red, save_domain, end))
 	return
 
 #######################################################################
@@ -568,6 +566,7 @@ def rocketreach(domain) :
 					pagination = json_data["pagination"]
 					current_page = pagination["thisPage"]
 					next_page = pagination["nextPage"]
+	print("{0}\t [!] List of {1} names retrieved !{2}\n".format(red, len(names), end))
 	return
 
 #############################################################################
@@ -631,7 +630,7 @@ def write_all(domain) :
 	for name in names :
 		output_names.write(name + "\n")
 	output_names.close()
-	print("\n\t{0}[!] List of {1} emails and {2} names written in {3}/harvest/.{4}\n".format(red, len(firstname_lastname), len(names), domain, end))
+	print("\n\t{0}[!] List of {1} emails names written in {2}/harvest/.{3}\n".format(red, len(firstname_lastname), domain, end))
 	return
 
 def interruptHandler(signal, frame):
@@ -671,6 +670,8 @@ parser.add_argument("--scan", help = "Type of scan : fast = 1000 first ports, al
 parser.add_argument("--gather", help = "Will download and check for metadats in files.", nargs = "?", const = "yes", dest = "gather")
 parser.add_argument("--harvest", help = "Will create multiples lists of email addresses using differents API's.", nargs = "?", const = "yes", dest = "harvest")
 args = parser.parse_args()
+#if (not args.sublist or not args.subrute) and args.scan :
+#	sys.exit("{0}[!] You need to enable --sublist or --subrute module to use --scan{1}".format(red, end))
 
 ##################################
 #The most important variable :D !
@@ -685,7 +686,7 @@ if os.path.isdir(current_dir + "/" + domain) :
 	pass
 else :
 	os.system("mkdir {0}".format(domain))
-	os.system("mkdir {0}/dns {0}/document {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
+	os.system("mkdir {0}/dns {0}/document {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
 	extensions = open("configuration/extensions").readlines()
 	for ext in extensions :
 		ext = ext.replace("\n", "")
@@ -701,10 +702,14 @@ if args.dns :
 if args.subrute or args.sublist :
 	get_domains(domain)
 	from_domains_to_ips(domain)
+	#if args.scan :
+		#scanner(domain, args.scan)
+		#if shodan_api_key is not "" :
+			#scrape_shodan(domain)
 if args.scan :
-	scanner(domain, args.scan)
-	#if shodan_api_key is not "" :
-	#	scrape_shodan(domain)
+		scanner(domain, args.scan)
+		if shodan_api_key is not "" :
+			scrape_shodan(domain)
 if args.gather :
 	documents_gathering(domain, args.gather)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
