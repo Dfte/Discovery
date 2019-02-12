@@ -113,13 +113,10 @@ All results will be written in a file in this tree :
  - Find a way to detect emails patterns
      - Query HaveIBeenPowned API to gather statistics about pwned emails 
  
- - Improve the scanning function for different services :
-     - May be add some web scanner or API that detects flaws related to a certain CMS  
+ - Improve the scanning function for different services :  
      - Add Http screenshot
-     - Parse output of searchsploit results
-      - Add UDP scans
+     - Add UDP scans
      
- - Find a way to deal with Googles Captchas
  - Dynamic display for the document dowloads (almost done :D )
  - Threader le download de fichiers
  
@@ -127,7 +124,6 @@ All results will be written in a file in this tree :
     - add ip2host to detect new virtual hosts
     - check for reverse dns 
     - Check CN's in protocoles' certificates (ssh, ftps....)
- - Implement true python code to circumvent whatcms api
  
- - Rewrite the readme which kinda old now :P
+ - Rewrite the readme which is kinda old now :P
  
