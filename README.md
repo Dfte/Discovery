@@ -127,5 +127,7 @@ All results will be written in a file in this tree :
     - add ip2host to detect new virtual hosts
     - check for reverse dns 
     - Check CN's in protocoles' certificates (ssh, ftps....)
-    
+ - Implement true python code to circumvent whatcms api
+ 
+ - Rewrite the readme which kinda old now :P
  
