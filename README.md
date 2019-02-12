@@ -128,7 +128,6 @@ All results will be written in a file in this tree :
     - check for reverse dns 
     - Check CN's in protocoles' certificates (ssh, ftps....)
  - Implement true python code to circumvent whatcms api
- - Improve the waf detection paring
  
  - Rewrite the readme which kinda old now :P
  
