@@ -120,7 +120,6 @@ All results will be written in a file in this tree :
       - Add UDP scans
      
  - Find a way to deal with Googles Captchas
-    - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
  - Dynamic display for the document dowloads (almost done :D )
  - Threader le download de fichiers
  
