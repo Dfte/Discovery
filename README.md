@@ -111,31 +111,42 @@ All results will be written in a file in this tree :
 
 # To Do list :
 
- - Search for sensitive files on Pastebin/Github (ON GOING)
- - Find a way to detect emails patterns
-     - Query HaveIBeenPowned API to gather statistics about pwned emails : email-format.com
-
-  - Improve the scanning function for different services :
+ -Document gathering :
+     - Search for sensitive files on Pastebin/Github (ON GOING)
+     - Google dorks (index of, error message)
+ 
+ -Harvesting :
+     - Find a way to detect emails patterns using email-format.com
+     - Query HaveIBeenPowned API to gather statistics about pwned emails
+     - Archive.org : error messages
+     
+ -Scanning function
      - May be add some web scanner or API that detects flaws related to a certain CMS  
      - Add Http screenshot
      - Parse output of searchsploit results
      - Add UDP scans
      - Searchsploit
-  
- - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
- - Thread files downloads
- - Add IP/domains discovery :
+     - Dirbuster ? http/s vhost/ipt 
+     - If SVN or .git -> dvcs ripper ???
+ 
+ -DNS enumeration 
+    - Create list of IP using ripe databsaes results
     - add BING ip2host to detect new virtual hosts
     - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
- - In the end get ride of the API's (especially the whatcms api and the hunter/rocketreach)(converning the shodan one i guess it's not that important)
- - Add a real configuration file
- - Google dorks (index of, error message)
- - Archive.org : error messages
- - Add the possibility to delete or not the downloaded files (document gathering)
- - Implement admin interface bruteforce
- - If SVN or .git -> dvcs ripper
- - Dirbuster ? http/s vhost/ip
- - Threader le tout 
- - Search on the deep web
- - Create list of IP using ripe databsaes results
+    
+ -Configuration file :
+    - Add a real configuration file (give possibility to remove github repos, pastes, downloaded files (if there are no warning words in them)
+ 
+ -Final :
+    - Search on the deep web
+    - Threads files downloads and modules so that they can work in parrallel
+    - Get ride of the API's (especially the whatcms api and the hunter/rocketreach)
+    - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
+
+
+
+
+
+
+
