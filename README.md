@@ -1,7 +1,6 @@
 # Discovery
 
-Discovery is a fully automated OSINT tool that will gather informations from a lot of differents sources. Actually this is the beta test version :) !
-
+Discovery is a fully automated OSINT tool that will gather informations from a lot of differents sources. 
 Discovery relies on 6 modules that can be used all at once or independently. All you need to have to launch the tool is a domain name.
 
 ## Warning
@@ -14,7 +13,7 @@ This tool relies on 4 FREE API's :
 
 BUT !
 
-With Discovery v1.2 you can now use a huge part of the tool even without the API keys. Note that you wull not be able to use the harvester module nor the shodan and whatCMS api.
+With Discovery v1.2 you can now use a huge part of the tool even without the API keys. Note that you will not be able to use the harvester module nor the shodan and whatCMS api.
 
 ## Whois/DNS request
 
@@ -43,7 +42,7 @@ or
 
 The difference is that when using --subrute, sublist3r will perform a DNS bruteforce which will take much more time but will also find more subdomains.
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/2.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/12.png">
 </p>
 
 ## Scanner module
@@ -57,7 +56,7 @@ The first function is an implementaiton of the python nmap librairy. It will sca
 Depending of the services discovered it will perform a few actions. Actually I only took care of the HTTP/HTTPS services. So the script will check the SSL certificate, check for the CMS used (if there is one), check for comon important files (.git, /status, trace.axd, robots.txt. If those files are found, they will be downloaded).
 
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/6.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/16.png">
 </p>
 
 >Note : you can add as much files as you want in the "warning_file" file in the configuration directory.
@@ -66,16 +65,16 @@ It will also look for potential WAF using the wafwoof tool developped by EnableS
 
 The tool will output an XML files that will be used with searchsploit in order to present you some exploits. (I still have to work on parsing the output of searchsploit but hey... This is coming soon :) )
 
-The second function will use the Shodan API to gather informations about the domain name : found servers, services, CVE's related to the services and so on...
+The second function will use the Shodan API to gather informations about the domain name : found servers, services, CVE's related to the services as much as a description of CVE's found :
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/5.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/15.png">
 </p>
 
 ## Metadatas Scrapper
 
 This module is basically my Linux version of FOCA :
 
-    python3 discovery.py -d "domain_name" --gather "number_of_pages_to_crawl"
+    python3 discovery.py -d "domain_name" --gather
 
 Using Google dorks it will gather publicly exposed documents and parse their metadatas in order to find sensitive informations (credentials for exemple)
 This module is inspired by the pyfoca script written by altjx : https://github.com/altjx/ipwn/tree/master/pyfoca
@@ -84,8 +83,10 @@ To parse the metadatas I used exiftool.
 
 >Note : you can add as much extensions as you want in the "extensions" file in the configuration directory
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/3.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/13.png">
 </p>
+
+All files found will be downloaded and parsed. 
 
 ## Harvestor
 
@@ -94,18 +95,18 @@ The last module will use differents API's to gather names of employee working fo
     python3 discovery.py -d "domain_name" --harvest 
 
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/4.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/14.png">
 </p>
 
 # Full command 
 
 So basically if you want to run all modules you can use this command :
 
-    python3 discovery.py -d "domain_name" --dns (--sublist or --subrute) --scan (full or fast) --gather x -- harvest
+    python3 discovery.py -d "domain_name" --dns (--sublist or --subrute) --scan (full or fast) --gather --harvest
 All results will be written in a file in this tree :
 
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/7.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/17.png">
 </p>
 
 # To Do list :
