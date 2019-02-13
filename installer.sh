@@ -10,7 +10,7 @@ cd ../
 git clone https://github.com/joepie91/python-whois.git
 cd python-whois
 python3 setup.py install
-cd
+cd ../
 
 
 #################
