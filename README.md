@@ -95,7 +95,7 @@ The last module will use differents API's to gather names of employee working fo
     python3 discovery.py -d "domain_name" --harvest 
 
 <p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/14.png">
+<img src="https://github.com/Dfte/Discovery/blob/master/images/18.png">
 </p>
 
 # Full command 
