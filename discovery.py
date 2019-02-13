@@ -142,24 +142,25 @@ def dns_info(domain, dns_servers):
 	for record in records :
 		try :
 			values = dns.resolver.query(domain, record)
+			if values :
+				for value in values:
+						if record == "A" :
+							data += "\tRecord A    : {0}\n".format(value)
+						if record == "AAAA" :
+							data += "\tRecord AAAA : {0}\n".format(value)
+						if record == "MX" :
+							data += "\tRecord MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0])
+						if record == "SOA" :
+							data += "\tRecord SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0])
+						if record == "NS" :
+							data += "\tRecord NS   : {0}\n".format(str(value).rsplit(".", 1)[0])
+							if str(value).rsplit(".", 1)[0] not in dns_servers :
+								dns_servers.append(str(value).rsplit(".", 1)[0])
+						if record == "TXT" :
+							data += "\tRecord TXT  : {0}\n".format(str(value).rsplit(".", 1)[0])
 		except :
+			print("{0}\tNo record {1} found.{2}".format(red, record, end))
 			pass
-		if values :
-			for value in values:
-				if record == "A" :
-					data += "\tRecord A    : {0}\n".format(value)
-				if record == "AAAA" :
-					data += "\tRecord AAAA : {0}\n".format(value)
-				if record == "MX" :
-					data += "\tRecord MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0])
-				if record == "SOA" :
-					data += "\tRecord SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0])
-				if record == "NS" :
-					data += "\tRecord NS   : {0}\n".format(str(value).rsplit(".", 1)[0])
-					if str(value).rsplit(".", 1)[0] not in dns_servers :
-						dns_servers.append(str(value).rsplit(".", 1)[0])
-				if record == "TXT" :
-					data += "\tRecord TXT  : {0}\n".format(str(value).rsplit(".", 1)[0])
 	print(data + "{0}".format(end))
 	print("\t{0}[!] Full dig report written in {1}/dns/dig{2}\n".format(red, domain, end))
 	if len(dns_servers) > 0 :
