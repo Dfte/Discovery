@@ -133,6 +133,7 @@ All results will be written in a file in this tree :
     - add BING ip2host to detect new virtual hosts
     - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
+    - Add FQDN databases lookup
     
  - Configuration file :
     - Add a real configuration file (give possibility to remove github repos, pastes, downloaded files (if there are no warning words in them)
