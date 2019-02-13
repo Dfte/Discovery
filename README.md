@@ -111,6 +111,7 @@ All results will be written in a file in this tree :
 
 # To Do list :
 
+ - Search for sensitive files on Pastebin/Github (ON GOING)
  - Find a way to detect emails patterns
      - Query HaveIBeenPowned API to gather statistics about pwned emails : email-format.com
 
@@ -120,9 +121,8 @@ All results will be written in a file in this tree :
      - Parse output of searchsploit results
      - Add UDP scans
      - Searchsploit
-     
- - Find a way to deal with Googles Captchas
-    - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
+  
+ - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
  - Thread files downloads
  - Add IP/domains discovery :
     - add BING ip2host to detect new virtual hosts
@@ -130,7 +130,6 @@ All results will be written in a file in this tree :
     - Check CN's in protocoles' certificates (ssh, ftps....)
  - In the end get ride of the API's (especially the whatcms api and the hunter/rocketreach)(converning the shodan one i guess it's not that important)
  - Add a real configuration file
- - Search for sensitive files on Pastebin/Github
  - Google dorks (index of, error message)
  - Archive.org : error messages
  - Add the possibility to delete or not the downloaded files (document gathering)
