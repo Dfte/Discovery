@@ -113,16 +113,30 @@ All results will be written in a file in this tree :
  - Find a way to detect emails patterns
      - Query HaveIBeenPowned API to gather statistics about pwned emails 
  
- - Improve the scanning function for different services :  
+ - Improve the scanning function for different services :
+     - May be add some web scanner or API that detects flaws related to a certain CMS  
      - Add Http screenshot
+     - Parse output of searchsploit results
      - Add UDP scans
+     - Searchsploit
      
- - Threader le download de fichiers
+ - Find a way to deal with Googles Captchas
+    - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
+ - Dynamic display for the document dowloads (almost done :D )
+ - Thread files downloads
  
  - Add IP/domains discovery :
-    - add ip2host to detect new virtual hosts
-    - check for reverse dns 
+    - add BING ip2host to detect new virtual hosts
+    - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
- 
- - Rewrite the readme which is kinda old now :P
+ - In the end get ride of the API's (especially the whatcms api and the hunter/rocketreach)(converning the shodan one i guess it's not that important)
+ - Add a real configuration file
+ - Search for sensitive files on Pastebin/Github
+ - Google dorks (index of, error message)
+ - Archive.org : error messages
+ - Add the possibility to delete or not the downloaded files (document gathering)
+ - Implement admin interface bruteforce
+ - If SVN or .git -> dvcs ripper
+ - Dirbuster ? http/s vhost/ip
+ - Threader le tout 
  
