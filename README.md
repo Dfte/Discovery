@@ -112,7 +112,7 @@ All results will be written in a file in this tree :
 # To Do list :
 
  - Find a way to detect emails patterns
-     - Query HaveIBeenPowned API to gather statistics about pwned emails 
+     - Query HaveIBeenPowned API to gather statistics about pwned emails : email-format.com
  
  - Improve the scanning function for different services :
      - May be add some web scanner or API that detects flaws related to a certain CMS  
