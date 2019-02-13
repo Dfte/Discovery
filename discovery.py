@@ -462,7 +462,7 @@ def documents_gathering(domain, max_scrape):
 						write_file.close()
 						parse(save_domain, file_path, name_file)
 						sys.stdout.write('\r')
-						sys.stdout.write("{0}\tDownloaded {1} over {2} {3} files{4}\n".format(green, found, len(found_urls), ext, end))
+						sys.stdout.write("{0}\tDownloaded {1} out of {2} .{3} files{4}\n".format(green, found, len(found_urls), ext, end))
 						sys.stdout.flush()
 				time.sleep(randint(20, 30))
 				found = 0
@@ -498,7 +498,7 @@ def documents_gathering(domain, max_scrape):
 		for last in last_save :
 			output_write.write(last + "\n")
 		output_write.close()
-	print("{0}\t[!] Full and summarized metadatas reports stored in : {1}/document/metadata_*.{2}\n".format(red, save_domain, end))
+	print("{0}\t[!] Metadatas reports stored in : {1}/document/metadata_*.{2}\n".format(red, save_domain, end))
 	return
 
 #######################################################################
