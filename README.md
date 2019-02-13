@@ -111,7 +111,7 @@ All results will be written in a file in this tree :
 
 # To Do list :
 
- - Correct the bugs
+ - Correct the bugs (bug in the whois function)
  - Find a way to detect emails patterns
      - Query HaveIBeenPowned API to gather statistics about pwned emails : email-format.com
  
