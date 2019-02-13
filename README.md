@@ -111,42 +111,35 @@ All results will be written in a file in this tree :
 
 # To Do list :
 
- -Document gathering :
-     - Search for sensitive files on Pastebin/Github (ON GOING)
-     - Google dorks (index of, error message)
+ - Document gathering :
+    - Search for sensitive files on Pastebin/Github (ON GOING)
+    - Google dorks (index of, error message)
  
- -Harvesting :
-     - Find a way to detect emails patterns using email-format.com
-     - Query HaveIBeenPowned API to gather statistics about pwned emails
-     - Archive.org : error messages
+ - Harvesting :
+    - Find a way to detect emails patterns using email-format.com
+    - Query HaveIBeenPowned API to gather statistics about pwned emails
+    - Archive.org : error messages
      
- -Scanning function
-     - May be add some web scanner or API that detects flaws related to a certain CMS  
-     - Add Http screenshot
-     - Parse output of searchsploit results
-     - Add UDP scans
-     - Searchsploit
-     - Dirbuster ? http/s vhost/ipt 
-     - If SVN or .git -> dvcs ripper ???
+ - Scanning function
+    - May be add some web scanner or API that detects flaws related to a certain CMS  
+    - Add Http screenshot
+    - Parse output of searchsploit results
+    - Add UDP scans
+    - Searchsploit
+    - Dirbuster ? http/s vhost/ipt 
+    - If SVN or .git -> dvcs ripper ???
  
- -DNS enumeration 
+ - DNS enumeration 
     - Create list of IP using ripe databsaes results
     - add BING ip2host to detect new virtual hosts
     - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
     
- -Configuration file :
+ - Configuration file :
     - Add a real configuration file (give possibility to remove github repos, pastes, downloaded files (if there are no warning words in them)
  
- -Final :
+ - Final :
     - Search on the deep web
     - Threads files downloads and modules so that they can work in parrallel
     - Get ride of the API's (especially the whatcms api and the hunter/rocketreach)
     - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
-
-
-
-
-
-
-
