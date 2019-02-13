@@ -123,9 +123,8 @@ All results will be written in a file in this tree :
  - Scanning function
     - May be add some web scanner or API that detects flaws related to a certain CMS  
     - Add Http screenshot
-    - Parse output of searchsploit results
+    - Searchsploit and parse output of searchsploit results
     - Add UDP scans
-    - Searchsploit
     - Dirbuster ? http/s vhost/ipt 
     - If SVN or .git -> dvcs ripper ???
  
