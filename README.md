@@ -114,8 +114,8 @@ All results will be written in a file in this tree :
  - Correct the bugs (bug in the whois function)
  - Find a way to detect emails patterns
      - Query HaveIBeenPowned API to gather statistics about pwned emails : email-format.com
- 
- - Improve the scanning function for different services :
+
+  - Improve the scanning function for different services :
      - May be add some web scanner or API that detects flaws related to a certain CMS  
      - Add Http screenshot
      - Parse output of searchsploit results
@@ -126,7 +126,6 @@ All results will be written in a file in this tree :
     - Add the possibility to use some modules with a list of domains (will be done for --subbrute/--sublist, and --harvest but not  for --gather because they are 80% chances we got blocked by google, tho i might implement it when i'll find a way to bypass googles captacha)
  - Dynamic display for the document dowloads (almost done :D )
  - Thread files downloads
- 
  - Add IP/domains discovery :
     - add BING ip2host to detect new virtual hosts
     - check for reverse dns (PTR ?)
@@ -142,3 +141,4 @@ All results will be written in a file in this tree :
  - Dirbuster ? http/s vhost/ip
  - Threader le tout 
  - Search on the deep web
+ - Create list of IP using ripe databsaes results
