@@ -115,9 +115,6 @@ All results will be written in a file in this tree :
     - Search for sensitive files on Pastebin/Github (DONE FOR PASTEBIN)
     - Archive.org : error messages
     - Google dorks (index of, error message)
- 
- - Harvesting :
-    - Query HaveIBeenPowned API to gather statistics about pwned emails
     - Add this API : psbdmp.ws
     
  - Scanning function
