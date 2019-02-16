@@ -113,13 +113,12 @@ All results will be written in a file in this tree :
 
  - Document gathering :
     - Search for sensitive files on Pastebin/Github (DONE FOR PASTEBIN)
+    - Archive.org : error messages
     - Google dorks (index of, error message)
  
  - Harvesting :
-    - Find a way to detect emails patterns using email-format.com
     - Query HaveIBeenPowned API to gather statistics about pwned emails
-    - Archive.org : error messages
-     
+   
  - Scanning function
     - May be add some web scanner or API that detects flaws related to a certain CMS  
     - Add Http screenshot
