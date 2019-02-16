@@ -1,6 +1,7 @@
 # This file contains the email pattern that should be used 
 # Actually there are 8 format supported but you can add
-# your in this file and in the python script :
+# your in this file and in the python script.
+# To select a pattern just copy paste one of the eight following values :
 # firstname.lastname (ex : aurelien.chalot@orange.com)
 # lastname.firstname (ex : chalot.aurelien@orange.com)
 # firstnamelastname (ex : aurelienchalot@orange.com)
@@ -10,6 +11,9 @@
 # flastname (ex : achalot@orange.com)
 # lfirstname (ex : caurelien@orange.com)
 
+#For example if you want to create mail list that suits  firstname.lastname pattern
+#You'll have to complete the line this way :
 pattern:firstname.lastname
 
-#NOTE : if the pattern is not completed then we will create as much emails list as they are formats (8 actually)
+#NOTE : if the pattern is not completed or the value is not handled, 
+#then we will create as much emails list as they are formats (8 actually)
