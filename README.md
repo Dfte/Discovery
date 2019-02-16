@@ -112,7 +112,7 @@ All results will be written in a file in this tree :
 # To Do list :
 
  - Document gathering :
-    - Search for sensitive files on Pastebin/Github (ON GOING)
+    - Search for sensitive files on Pastebin/Github (DONE FOR PASTEBIN)
     - Google dorks (index of, error message)
  
  - Harvesting :
@@ -136,7 +136,7 @@ All results will be written in a file in this tree :
     - Add FQDN databases lookup
     
  - Configuration file :
-    - Add a real configuration file (give possibility to remove github repos, pastes, downloaded files (if there are no warning words in them)
+    - Add a real configuration file (give possibility to remove github repos, pastes, downloaded files (if there are no warning words in them) merging all existing files
  
  - Final :
     - Search on the deep web
