@@ -129,6 +129,7 @@ All results will be written in a file in this tree :
     - Add UDP scans
     - Dirbuster ? http/s vhost/ipt 
     - If SVN or .git -> dvcs ripper ???
+    - https://github.com/Tuhinshubhra/CMSeeK instead of whatcms api
  
  - DNS enumeration 
     - Create list of IP using ripe databsaes results
