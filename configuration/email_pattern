@@ -2,14 +2,14 @@
 # Actually there are 8 format supported but you can add
 # your in this file and in the python script.
 # To select a pattern just copy paste one of the eight following values :
-# firstname.lastname (ex : aurelien.chalot@orange.com)
-# lastname.firstname (ex : chalot.aurelien@orange.com)
-# firstnamelastname (ex : aurelienchalot@orange.com)
-# lastnamefirstname (ex : chalotaurelien@orange.com)
-# f.lastname (ex : a.chalot@orange.com)
-# l.firstname (ex : c.aurelien@orange.com)
-# flastname (ex : achalot@orange.com)
-# lfirstname (ex : caurelien@orange.com)
+# firstname.lastname 
+# lastname.firstname 
+# firstnamelastname
+# lastnamefirstname
+# f.lastname 
+# l.firstname 
+# flastname 
+# lfirstname 
 
 #For example if you want to create mail list that suits  firstname.lastname pattern
 #You'll have to complete the line this way :
