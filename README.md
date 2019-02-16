@@ -110,6 +110,11 @@ All results will be written in a file in this tree :
 </p>
 
 # To Do list :
+ - Code refactoring
+    - Use of class
+    - each functions/modules in separate files
+    - add more configuration options
+    - Review of the already existing code (adding some performance)
 
  - Document gathering :
     - Search for sensitive files on Pastebin/Github (DONE FOR PASTEBIN)
