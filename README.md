@@ -118,7 +118,8 @@ All results will be written in a file in this tree :
  
  - Harvesting :
     - Query HaveIBeenPowned API to gather statistics about pwned emails
-   
+    - Add this API : psbdmp.ws
+    
  - Scanning function
     - May be add some web scanner or API that detects flaws related to a certain CMS  
     - Add Http screenshot
