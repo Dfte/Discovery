@@ -523,6 +523,82 @@ def parse(domain, path, name) :
 		output_write.write(str(info) + " : " + str(value) + "\n")
 	output_write.close()
 
+#############################################################################
+# This function will look for sensitives informations on pastebin and github
+#############################################################################
+def dumps(domain) :
+	print("{0}[#] Looking for sensitive datas on dump plateforms.{1}".format(white, end))
+	sources =[]
+	outputs = open("configuration/sources", "r")
+	for output in outputs.readlines() :
+		sources.append(output.replace("\n", ""))
+	output = open("configuration/warning_words", "r")
+	words = []
+	for word in output.readlines() :
+		words.append(word.replace("\n", ""))
+	output.close()
+	pastes = []
+	links = []
+	save_domain = domain
+	headers = {
+		"Accept": "*/*",
+		"Accept-Language": "en-US;q=0.9",
+		"Cache-Controle": "max-age=0",
+		"Connection": "keep-alive",
+		"Host": "www.google.com",
+		"Referer": "https://www.google.com/",
+		"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:64.0) Gecko/20100101 Firefox/64.0",
+	}
+	for source in sources :
+		count = 0
+		found = 0
+		while 1 :
+			query = "https://www.google.com/search?q=site:{0}+intext:'*{1}'&start={2}&num=100".format(source, domain, count)
+			print(query)
+			request = requests.get(query, headers = headers)
+			if request.status_code == 503 :
+				print("\n\t{0}[!] We got blocked by Google stopping the crawl...{1}\n".format(red, end))
+				return
+			soup = BeautifulSoup(request.text, 'html.parser')
+			urls = soup.findAll("cite", {"class" : "iUh30" })
+			try :
+				for url in urls :
+					print(urls)
+					links.append(url.text)
+					if url.text not in pastes :
+						found += 1
+						paste_id = url.text.split("/")[-1]
+						pastes.append(paste_id)
+						if source == "pastebin.com" :
+							request = requests.get("https://pastebin.com/raw/{0}".format(paste_id))
+						elif source == "github.com" :
+							# TO BE DONE
+							request = requests.get(url)
+						for word in words :
+							if word in str(request.text).lower() :
+								print("\t{0} Found sensitive word : '{1}' in {2}{3}".format(red, word, paste_id, end))
+						file_path = "{0}/document/{1}/{2}".format(save_domain, source.split(".")[0], paste_id)
+						write_file = open(file_path, "w+")
+						write_file.write(str(request.text))
+						write_file.close()
+				time.sleep(randint(20, 30))
+				if count == 0 :
+					count += 2
+				else :
+					count += 1
+				buttons = soup.findAll("a", {"class" : "fl" })
+				page = []
+				for button in buttons :
+					button = re.sub(r'\n\s*\n', r'\n\n', button.get_text().strip(), flags = re.M)
+					page.append(button)
+				if str(count) not in page :
+					break
+			except Exception as e :
+				print(e)
+				pass
+	print("\n\t{0}[!] {1} pastes/repos downloaded in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
+	return
+	
 #########################################################################
 # This function will look on hunter.io API to find emails related to the
 # domain you're working on.
@@ -687,7 +763,7 @@ if os.path.isdir(current_dir + "/" + domain) :
 	pass
 else :
 	os.system("mkdir {0}".format(domain))
-	os.system("mkdir {0}/dns {0}/document {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
+	os.system("mkdir {0}/dns {0}/document {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
 	extensions = open("configuration/extensions").readlines()
 	for ext in extensions :
 		ext = ext.replace("\n", "")
@@ -713,6 +789,7 @@ if args.scan :
 			scrape_shodan(domain)
 if args.gather :
 	documents_gathering(domain, args.gather)
+	dumps(domain)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
