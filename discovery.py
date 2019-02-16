@@ -55,10 +55,6 @@ rocketreach_api_key = ""
 # DON'T DELETE THEM
 #########################################################################
 emails = []
-firstname_lastname = []
-flastname = []
-lfirstname = []
-lastname_firstname = []
 names = []
 software = []
 author = []
@@ -652,13 +648,24 @@ def rocketreach(domain) :
 # original and validated emails of the company so that there are no mistakes
 #############################################################################
 def mail_list_creator(domain) :
+	count = 0
 	global emails
+	patterns = ["firstname.lastname", "lastname.firstname", "firstname.lastname", "lastname.firstname", "f.lastname", "l.firstname", "flastname", "lfirstname"] 
 	global names
 	global firstname_lastname
 	global flastname
 	global lfirstname
 	global lastname_firstname
-	print("{0}[#] Creating email lists !{1}".format(white, end))
+	if os.path.isfile("configuration/email_pattern") :
+		output = open("configuration/email_pattern", "r")
+		for line in output.readlines() :
+			if line.startswith("pattern:") :
+				pattern = line.replace("\n", "").replace("pattern:", "")
+				if pattern in patterns :
+					print("{0}[#] Creating email list using {1} !{2}".format(white, pattern, end))
+				else :
+					pattern = None
+					print("{0}[#] Creating email lists !{1}".format(white, end))
 	for name in names :
 		# A changer
 		isascii = lambda name: len(name) == len(name.encode())
@@ -667,47 +674,52 @@ def mail_list_creator(domain) :
 			name = name.lower()
 			try :
 				firstname, lastname, *rest = name.split(" ")
+				count = count + 1
 			except :
 				pass
-			if firstname != "" and lastname != "" :
-				firstname_lastname.append("{0}.{1}@{2}".format(firstname, lastname, domain))
-				lastname_firstname.append("{0}.{1}@{2}".format(lastname, firstname, domain))
-				flastname.append("{0}{1}@{2}".format(firstname[0], lastname, domain))
-				lfirstname.append("{0}{1}@{2}".format(lastname[0], firstname, domain))
-	return
-
-##########################################################################
-# This function will write all names/emails found on files in the harvest
-# directory.
-##########################################################################
-def write_all(domain) :
-	global emails
-	global names
-	global firstname_lastname
-	global flastname
-	global lfirstname
-	global lastname_firstname
-	output_firstname_lastname = open("{0}/harvest/firstname_lastname".format(domain), "w+")
-	for mail in firstname_lastname :
-		output_firstname_lastname.write(mail + "\n")
-	output_firstname_lastname.close()
-	output_lastname_firstname = open("{0}/harvest/lastname_firstname".format(domain), "w+")
-	for mail in lastname_firstname:
-		output_lastname_firstname.write(mail + "\n")
-	output_lastname_firstname.close()
-	output_flastname = open("{0}/harvest/flastname".format(domain), "w+")
-	for mail in flastname:
-		output_flastname.write(mail + "\n")
-	output_flastname.close()
-	output_lfirstname = open("{0}/harvest/lfirstname".format(domain), "w+")
-	for mail in lfirstname:
-		output_lfirstname.write(mail + "\n")
-	output_lfirstname.close()
+			if pattern == None :
+				for pat in patterns :
+					write_output = open("{0}/harvest/{1}".format(domain, pat), "a+")
+					if pat == "firstname.lastname" :
+						write_output.write("{0}.{1}@{2}\n".format(firstname, lastname, domain))
+					if pat == "lastname.firstname" :
+						write_output.write("{0}.{1}@{2}\n".format(lastname, firstname, domain))
+					if pat == "firstnamelastname" :
+						write_output.write("{0}{1}@{2}\n".format(firstname, lastname, domain))
+					if pat == "lastnamefirstname" :
+						write_output.write("{0}{1}@{2}\n".format(lastname, firstname, domain))
+					if pat == "f.lastname" :
+						write_output.write("{0}.{1}@{2}\n".format(firstname[0], lastname, domain))
+					if pat == "l.firstname" :
+						write_output.write("{0}.{1}@{2}\n".format(lastname[0], firstname, domain))
+					if pat == "lfirstname" :
+						write_output.write("{0}{1}@{2}\n".format(lastname[0], firstname, domain))
+					if pat == "flastname" :
+						write_output.write("{0}{1}@{2}\n".format(firstname[0], lastname, domain))
+			else:
+				write_output = open("{0}/harvest/{1}".format(domain, pattern), "a+")
+				if pattern == "firstname.lastname" :
+					write_output.write("{0}.{1}@{2}\n".format(firstname, lastname, domain))
+				if pattern == "lastname.firstname" :
+					write_output.write("{0}.{1}@{2}\n".format(lastname, firstname, domain))
+				if pattern == "firstnamelastname" :
+					write_output.write("{0}{1}@{2}\n".format(firstname, lastname, domain))
+				if pattern == "lastnamefirstname" :
+					write_output.write("{0}{1}@{2}\n".format(lastname, firstname, domain))
+				if pattern == "f.lastname" :
+					write_output.write("{0}.{1}@{2}\n".format(firstname[0], lastname, domain))
+				if pattern == "l.firstname" :
+					write_output.write("{0}.{1}@{2}\n".format(lastname[0], firstname, domain))
+				if pattern == "lfirstname" :
+					write_output.write("{0}{1}@{2}\n".format(lastname[0], firstname, domain))
+				if pattern == "flastname" :
+					write_output.write("{0}{1}@{2}\n".format(firstname[0], lastname, domain))
+	write_output.close()
 	output_names = open("{0}/harvest/names".format(domain), "w+")
 	for name in names :
 		output_names.write(name + "\n")
 	output_names.close()
-	print("\n\t{0}[!] List of {1} emails names written in {2}/harvest/.{3}\n".format(red, len(firstname_lastname), domain, end))
+	print("\n\t{0}[!] List of {1} emails written in {2}/harvest/.{3}\n".format(red, count, domain, end))
 	return
 
 def interruptHandler(signal, frame):
@@ -794,7 +806,6 @@ if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
 	mail_list_creator(domain)
-	write_all(domain)
 #except Exception as e:
 #	print("{0}[!] An error occured... Please contact me and paste the following trace so that I can fix it :) !\n{1}".format(red, end))
 
