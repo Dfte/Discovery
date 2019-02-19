@@ -225,6 +225,34 @@ def from_domains_to_ips(domain) :
 	print("\n\t{0}[!] IP's, domains and IP's to domains file written in {1}/dns/{2}\n".format(red, save_domain, end))
 	return
 
+###########################################################################################
+# This function is using the ip2host feature from bing that was wrapped into a bash script
+# Shutout to Andrew Horton
+# http://www.morningstarsecurity.com/research/bing-ip2hosts
+###########################################################################################
+def ip2host(domain) :
+	listip = []
+	save_domain = domain
+	print("{0}[#] Using Bing ip2host to gather new IP's !{1}".format(white, end))
+	domains = open("{0}/dns/domains".format(domain))
+	ips = open("{0}/dns/ips".format(domain))
+	for ip in ips.readlines() :
+		listip.append(ip.replace("\n", ""))
+	ips.close()
+	print(len(listip))
+	for domain in domains.readlines() :
+		domain = domain.replace("\n", "")
+		output = check_output(["bing-ip2hosts", "{0}".format(domain)])
+		output = output.decode('ascii')
+		ip = re.findall( r'[0-9]+(?:\.[0-9]+){3}', output)
+		if ip and ip[0] not in listip :
+			listip.append(ip[0])
+			print(ip[0])
+	listip = set(listip)
+	domains.close()
+	print(len(listip))
+	return
+
 #############################################################################
 # This function will first launch a nmap scan on all ips/domains detected
 # or on the in scope domains/ips. Depending of the result a few others tools
@@ -775,6 +803,7 @@ if args.dns :
 if args.subrute or args.sublist :
 	get_domains(domain)
 	from_domains_to_ips(domain)
+	ip2host(domain)
 	#if args.scan :
 		#scanner(domain, args.scan)
 		#if shodan_api_key is not "" :
