@@ -8,13 +8,17 @@ import sys
 import time
 import nmap
 import json
+import struct
 import socket
 import shodan
 import dns.zone
 import requests
 import argparse
+import textwrap
 import dns.query
 import sublist3r
+import validators
+import subprocess
 import pythonwhois
 import dns.resolver
 from random import randint
@@ -77,12 +81,11 @@ end = "\033[m"
 ######################################
 def banner() :
 	print("""{0}
-
    8888b.  88 .dP"Y8  dP""b8  dP"Yb  Yb    dP 888888 88""Yb Yb  dP   
     8I  Yb 88 `Ybo." dP   `" dP   Yb  Yb  dP  88__   88__dP  YbdP   
     8I  dY 88 o.`Y8b Yb      Yb   dP   YbdP   88""   88"Yb    8P   
-   8888Y"  88 8bodP'  YboodP  YbodP     YP    888888 88  Yb  dP    
- = 1602 ============================================== v1.0 =====
+   8888Y"  88 8bodP'  YboodP  YbodP     YP    888888 88  Yb  dP   
+   = 1602 ============================================== v1.2 ====
  	{1}""".format(yellow, end))
 	return
 
@@ -162,6 +165,38 @@ def dns_info(domain, dns_servers):
 	print("")
 	return
 
+##############################################################################
+# This function will gather IP ranges belonging to a certain domain using ripe
+# databases
+##############################################################################
+def ripe(domain) :
+	print("{0}[#] Looking for IP ranges using ripe.net.{1}".format(white, end))
+	check = []
+	request = requests.get("http://rest.db.ripe.net/search?source=ripe&query-string={0}&flags=no-filtering&flags=no-referenced".format(domain.split(".")[0]), headers = {"Accept" : "application/xml"})
+	if request.status_code == 200 :
+		soup = BeautifulSoup(request.text, "lxml")
+		contents = soup.find_all("attribute", {"name":"inetnum"})
+		if len(contents) > 0 :
+			output_write = open("{0}/dns/ips".format(domain), "w+")
+			for content in contents :
+				ips = []
+				if content not in check :
+					check.append(content)
+					print("\t{0}".format(green) + content['value'] + "{0}".format(end))
+					start = content['value'].split(" - ")[0]
+					final = content['value'].split(" - ")[1]
+					ipstruct = struct.Struct('>I')
+					start, = ipstruct.unpack(socket.inet_aton(start))
+					final, = ipstruct.unpack(socket.inet_aton(final))
+					for ip in [socket.inet_ntoa(ipstruct.pack(i)) for i in range(start, final + 1)] :
+						output_write.write(ip + "\n")
+			output_write.close()
+			print("\n\t{0}[!] IP ranges written in {1}/dns/ips.{2}\n".format(red, domain, end))
+			return
+		else :
+			print("\t{0}No range found.{1}\n".format(red, end))
+	return 
+
 ############################################################################
 # This function will try to enumerate subdomains using Sublist3r tool.
 # Depending of your wil, you can activate bruteforce module or not. Anyway,
@@ -195,7 +230,7 @@ def get_domains(domain) :
 	domain_file.writelines(domains)
 	domain_file.close()
 	print("{0}\tFound {1} domains : \n\t{2}{3}".format(green, len(domains), "\t".join(map(str, domains)), end))
-	print("\t{0}[!] List of {1} domains written in {2}/dns/{2}.domains{3}\n".format(red, len(domains), domain, end))
+	print("\t{0}[!] List of {1} domains written in {2}/dns/domains{3}\n".format(red, len(domains), domain, end))
 	return
 
 ##########################################################################
@@ -206,9 +241,13 @@ def from_domains_to_ips(domain) :
 	save_domain = domain
 	ips = []
 	print("{0}[#] Translating domain names to IP's.{1}".format(white, end))
-	domains = open("{0}/dns/{0}.domains".format(domain), "r")
-	output = open("{0}/dns/{0}.domains_to_ips".format(domain), "w+")
-	output2 = open("{0}/dns/{0}.ips".format(domain), "w+")
+	domains = open("{0}/dns/domains".format(domain), "r")
+	output = open("{0}/dns/domains_to_ips".format(domain), "w+")
+	output2 = open("{0}/dns/ips".format(domain), "r")
+	for ip in output2.readlines() : 
+		ips.append(ip)
+	output2.close()
+	output2 = open("{0}/dns/ips".format(domain), "w")
 	for domain in domains :
 		domain = domain.replace("\n", "")
 		try :
@@ -216,13 +255,16 @@ def from_domains_to_ips(domain) :
 			line_to_write = domain + " || " + ip + "\n"
 			output.write(line_to_write)
 			if ip not in ips :
-				output2.write(ip + "\n")
 				ips.append(ip)
 		except :
 			pass
+	ips = set(ips)
+	for ip in ips :
+		output2.write(ip + "\n")
+	output2.close()
 	domains.close()
 	output.close()
-	print("\n\t{0}[!] IP's, domains and IP's to domains file written in {1}/dns/{2}\n".format(red, save_domain, end))
+	print("\n\t{0}[!] IP's, domains and IP's to domains file written in {1}/dns/*\n".format(red, save_domain, end))
 	return
 
 ###########################################################################
@@ -232,7 +274,8 @@ def ip2host(domain) :
 	listip = []
 	listdomains = []
 	save_domain = domain
-	print("{0}[#] Using Bing ip2host to gather new IP's !{1}".format(white, end))
+	found = 0
+	print("{0}[#] Using Bing ip2host feature to gather new Virtual Hosts !{1}\n".format(white, end))
 	domains = open("{0}/dns/domains".format(domain), "r")
 	ips = open("{0}/dns/ips".format(domain), "r")
 	for ip in ips.readlines() :
@@ -255,11 +298,16 @@ def ip2host(domain) :
 						if new_dom not in listdomains :
 							print("\t{0}New virtual host found : {1}{2}".format(green, new_dom, end))
 							listdomains.append(new_dom)
+							found = 1
 	domains = set(listdomains)
 	output_write = open("{0}/dns/domains".format(save_domain), "w")
 	for domain in listdomains :
 		output_write.write(domain + "\n")
 	output_write.close()
+	if found == 1 :
+		print("\t{0} New Virtual Hosts written in {1}/dns/domains{2}\n".format(red, save_domain, end))
+	else :
+		print("\t{0} No more Virtual Hosts found{1}".format(red, end))
 	return
 
 #############################################################################
@@ -278,7 +326,7 @@ def scanner(domain, level) :
 		files.append(warning_file)
 	source_files.close()
 	print("{0}[#] Scanning found IP's {1}\n".format(white, end))
-	ips = open("{0}/dns/{0}.ips".format(domain), "r")
+	ips = open("{0}/dns/ips".format(domain), "r")
 	ips = ips.readlines()
 	for ip in ips :
 		ip = ip.replace("\n", "")
@@ -431,7 +479,7 @@ def scrape_shodan(domain):
 # pyfoca script written by altjx
 # Github : https://github.com/altjx/ipwn/tree/master/pyfoca
 ###########################################################################
-def documents_gathering(domain, max_scrape):
+def documents_gathering(domain):
 	global author
 	global software
 	global last_save
@@ -498,7 +546,7 @@ def documents_gathering(domain, max_scrape):
 			except Exception as e :
 				print(e)
 				pass
-	print("\n\t{0}[!] {1} documents downloaded and stored in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
+	print("\n\t{0}[!] {1} documents downloaded in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
 	list_name.close()
 	if len(author) > 0 :
 		output_write = open("{0}/document/metadatas_resume/authors".format(domain), "w+")
@@ -571,7 +619,6 @@ def dumps(domain) :
 		found = 0
 		while 1 :
 			query = "https://www.google.com/search?q=site:{0}+intext:'*{1}'&start={2}&num=100".format(source, domain, count)
-			print(query)
 			request = requests.get(query, headers = headers)
 			if request.status_code == 503 :
 				print("\n\t{0}[!] We got blocked by Google stopping the crawl...{1}\n".format(red, end))
@@ -580,7 +627,6 @@ def dumps(domain) :
 			urls = soup.findAll("cite", {"class" : "iUh30" })
 			try :
 				for url in urls :
-					print(urls)
 					links.append(url.text)
 					if url.text not in pastes :
 						found += 1
@@ -615,7 +661,7 @@ def dumps(domain) :
 				pass
 	print("\n\t{0}[!] {1} pastes/repos downloaded in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
 	return
-	
+
 #########################################################################
 # This function will look on hunter.io API to find emails related to the
 # domain you're working on.
@@ -718,7 +764,7 @@ def mail_list_creator(domain) :
 					if pat == "flastname" :
 						write_output.write("{0}{1}@{2}\n".format(firstname[0], lastname, domain))
 			else:
-				write_output = open("{0}/harvest/{1}".format(domain, pattern), "a+")
+				write_output = open("{0}/harvest/{1}".format(domain, pattern), "w+")
 				if pattern == "firstname.lastname" :
 					write_output.write("{0}.{1}@{2}\n".format(firstname, lastname, domain))
 				if pattern == "lastname.firstname" :
@@ -741,7 +787,10 @@ def mail_list_creator(domain) :
 		output_names.write(name + "\n")
 	output_names.close()
 	print("\n\t{0}[!] List of {1} emails written in {2}/harvest/.{3}\n".format(red, count, domain, end))
-	return
+	if pattern != None :
+		return pattern
+	else :
+		return None
 
 def interruptHandler(signal, frame):
 	print("{0}\n[!] User interruption... Leaving ! :) !{1}\n".format(red, end))
@@ -787,6 +836,8 @@ args = parser.parse_args()
 #The most important variable :D !
 ##################################
 domain = args.single_domain
+#if validators.domain(domain) != True :
+#	sys.exit("{0}[!] Invalid domain name...{1}".format(red, end))
 
 ############################
 # Creating output structure
@@ -805,10 +856,12 @@ else :
 #######################################
 # That's basically the script backbone
 #######################################
-#try :
+
+
 if args.dns :
 	dns_servers = get_whois(domain)
 	dns_info(domain, dns_servers)
+	ripe(domain)
 if args.subrute or args.sublist :
 	get_domains(domain)
 	from_domains_to_ips(domain)
@@ -822,14 +875,12 @@ if args.scan :
 		if shodan_api_key is not "" :
 			scrape_shodan(domain)
 if args.gather :
-	documents_gathering(domain, args.gather)
+	#documents_gathering(domain)
 	dumps(domain)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
 	mail_list_creator(domain)
-#except Exception as e:
-#	print("{0}[!] An error occured... Please contact me and paste the following trace so that I can fix it :) !\n{1}".format(red, end))
 
 ############################
 # Print signature banner :D
