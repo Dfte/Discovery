@@ -225,32 +225,37 @@ def from_domains_to_ips(domain) :
 	print("\n\t{0}[!] IP's, domains and IP's to domains file written in {1}/dns/{2}\n".format(red, save_domain, end))
 	return
 
-###########################################################################################
-# This function is using the ip2host feature from bing that was wrapped into a bash script
-# Shutout to Andrew Horton
-# http://www.morningstarsecurity.com/research/bing-ip2hosts
-###########################################################################################
-def ip2host(domain) :
+def ip2host(domain) :	
 	listip = []
+	listdomains = []
 	save_domain = domain
 	print("{0}[#] Using Bing ip2host to gather new IP's !{1}".format(white, end))
-	domains = open("{0}/dns/domains".format(domain))
-	ips = open("{0}/dns/ips".format(domain))
+	domains = open("{0}/dns/domains".format(domain), "r")
+	ips = open("{0}/dns/ips".format(domain), "r")
 	for ip in ips.readlines() :
 		listip.append(ip.replace("\n", ""))
 	ips.close()
-	print(len(listip))
 	for domain in domains.readlines() :
-		domain = domain.replace("\n", "")
-		output = check_output(["bing-ip2hosts", "{0}".format(domain)])
-		output = output.decode('ascii')
-		ip = re.findall( r'[0-9]+(?:\.[0-9]+){3}', output)
-		if ip and ip[0] not in listip :
-			listip.append(ip[0])
-			print(ip[0])
-	listip = set(listip)
+		listdomains.append(domain.replace("\n", ""))
 	domains.close()
-	print(len(listip))
+	print(len(listdomains))
+	for ip in listip :
+		print(ip)
+		request = requests.get("https://www.bing.com/search?q=ip:{0}".format(ip))
+		soup = BeautifulSoup(request.text,"html.parser")
+		h2s = soup.find_all("h2")
+		for h2 in h2s :
+			if h2.a:
+				if "bing" not in h2.a['href'] :
+					new_dom = h2.a['href'].replace("https://", "").replace("http://", "").split("/")[0]
+					if new_dom not in listdomains :
+						listdomains.append(new_dom)
+	domains = set(listdomains)
+	output_write = open("{0}/dns/domains".format(save_domain), "w")
+	for domain in listdomains :
+		output_write.write(domain + "\n")
+	output_write.close()
+	print(len(listdomains))
 	return
 
 #############################################################################
