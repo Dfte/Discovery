@@ -110,15 +110,9 @@ All results will be written in a file in this tree :
 </p>
 
 # To Do list :
-
-ON GOING :
- - Dumps on Github
-
-
  - Code refactoring
     - Use of class
     - each functions/modules in separate files
-    - add more configuration options
     - Review of the already existing code (adding some performance)
 
  - Document gathering :
@@ -136,7 +130,6 @@ ON GOING :
     - https://github.com/Tuhinshubhra/CMSeeK instead of whatcms api
  
  - DNS enumeration 
-    - Create list of IP using ripe databsaes results
     - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
     - Add FDNS databases lookup
