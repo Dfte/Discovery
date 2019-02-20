@@ -112,7 +112,6 @@ All results will be written in a file in this tree :
 # To Do list :
 
 ON GOING :
- - Bing ip2host
  - Dumps on Github
 
 
