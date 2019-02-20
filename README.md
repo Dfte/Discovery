@@ -138,7 +138,6 @@ ON GOING :
  
  - DNS enumeration 
     - Create list of IP using ripe databsaes results
-    - add BING ip2host to detect new virtual hosts
     - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
     - Add FDNS databases lookup
