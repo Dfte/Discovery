@@ -225,6 +225,9 @@ def from_domains_to_ips(domain) :
 	print("\n\t{0}[!] IP's, domains and IP's to domains file written in {1}/dns/{2}\n".format(red, save_domain, end))
 	return
 
+###########################################################################
+# This function will retrieve new virtual hosts using bing ip2host feature
+###########################################################################
 def ip2host(domain) :	
 	listip = []
 	listdomains = []
@@ -238,24 +241,25 @@ def ip2host(domain) :
 	for domain in domains.readlines() :
 		listdomains.append(domain.replace("\n", ""))
 	domains.close()
-	print(len(listdomains))
 	for ip in listip :
-		print(ip)
 		request = requests.get("https://www.bing.com/search?q=ip:{0}".format(ip))
 		soup = BeautifulSoup(request.text,"html.parser")
 		h2s = soup.find_all("h2")
 		for h2 in h2s :
 			if h2.a:
 				if "bing" not in h2.a['href'] :
-					new_dom = h2.a['href'].replace("https://", "").replace("http://", "").split("/")[0]
-					if new_dom not in listdomains :
-						listdomains.append(new_dom)
+					target = re.findall("https?:\/\/([^\/,\s]+\.[^\/,\s]+?)(?=\/|,|\s|$|\?|#)", h2.a['href'])
+					request = requests.get(h2.a['href'], verify = False)
+					if request.status_code == 403 or save_domain in request.text :
+						new_dom = h2.a['href'].replace("https://", "").replace("http://", "").split("/")[0]
+						if new_dom not in listdomains :
+							print("\t{0}New virtual host found : {1}{2}".format(green, new_dom, end))
+							listdomains.append(new_dom)
 	domains = set(listdomains)
 	output_write = open("{0}/dns/domains".format(save_domain), "w")
 	for domain in listdomains :
 		output_write.write(domain + "\n")
 	output_write.close()
-	print(len(listdomains))
 	return
 
 #############################################################################
