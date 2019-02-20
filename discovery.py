@@ -195,7 +195,7 @@ def get_domains(domain) :
 	domain_file.writelines(domains)
 	domain_file.close()
 	print("{0}\tFound {1} domains : \n\t{2}{3}".format(green, len(domains), "\t".join(map(str, domains)), end))
-	print("\t{0}[!] List of {1} domains written in {1}/dns/{1}.domains{2}\n".format(red, len(domains), domain, end))
+	print("\t{0}[!] List of {1} domains written in {2}/dns/{2}.domains{3}\n".format(red, len(domains), domain, end))
 	return
 
 ##########################################################################
