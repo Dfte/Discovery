@@ -1,0 +1,65 @@
+#################################################################################
+#                                                                               #
+#                               CONFIGURATION FILE                              #
+#                                                                               #
+#################################################################################
+
+###### API KEYS ######
+
+hunter_api_key:
+rocketreach_api_key:
+shodan_api_key:
+whatcms_api_key:
+
+###### Sublist/Subrute modules ######
+
+# This option will tell Discovery whether or not www.domain.tld and domain.tld should be
+# be considered as being the same Virtua Host. 
+# -Setting it to true will decrease the numbers of found domains but will speed up the all process
+# -Setting it to false will increase the numbers of found domains but slow down the all process
+# DEFAULT VALUE is True
+delete_www:False
+
+###### Scan module ######
+
+# This option will tell Discovery what are the sensitives files to look for while scanning
+# You can either give a list of files or a wordlist
+# BUT
+# This options is not supposed to be used as a dirbuster/dirseach tools
+# There is a dirsearch implementation already in the tool so just use provide most 
+# important files you can think of
+files:.git,trace.axd,status,robots.txt,.svn,WSDL,crossdomain.xml
+
+###### Gathering module ######
+
+# This option will tell Discovery what file extension it should look for
+# You can add as much as extensions as you want separated by a comma
+extensions:pdf,xls,doc,xlsx,exe,ppt,docx,txt,pptx,csv,odt,ods,
+
+# This option will tell Discovery wheter or not it should keep the downloaded documents 
+# after having parsed them.
+# -Setting it to true will delete the documents but won't allow you to look for sensitives ones
+# -Setting it to false will keep the documents but consume more space
+# DEFAULT VALUE is False
+delete_files:False
+
+# This option will tell Discovery what are the sensitive words it should look for in
+# Pastebin and github dumps.
+# Feel free to add as much words as you want separated by a comma
+sensitive:dbs,database,password,pass,email,dump,hack,exploit,attack
+
+###### Harvest module #######
+
+# This option will specify to Discovery what email pattern it should use
+# There are 8 formats available :
+# firstname.lastname (ex : aurelien.chalot@orange.com)
+# lastname.firstname (ex : chalot.aurelien@orange.com)
+# firstname.lastname (ex : aurelienchalot@orange.com)
+# lastname.firstname (ex : chalotaurelien@orange.com)
+# f.lastname (ex : a.chalot@orange.com)
+# l.firstname (ex : c.aurelien@orange.com)
+# flastname (ex : achalot@orange.com)
+# lfirstname (ex : caurelien@orange.com)
+# NOTE : if you don't specify any, Discovery will create the 8 possible lists
+# BUT you will not be able to use the Dump platform since it will overcharge it
+pattern:firstname.lastname
