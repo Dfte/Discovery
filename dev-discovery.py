@@ -170,19 +170,19 @@ def get_domains(domain, delete_www) :
 		print("{0}[#] Launching Sublist3r with bruteforce module enabled.{1}".format(white, end))
 		text_trap = io.StringIO()
 		sys.stdout = text_trap
-		sublist3r.main(domain, 100, "{0}/dns/{0}.domains".format(domain), ports = None, silent = True, verbose = False, enable_bruteforce = True, engines = None)
+		sublist3r.main(domain, 100, "{0}/dns/domains".format(domain), ports = None, silent = True, verbose = False, enable_bruteforce = True, engines = None)
 		sys.stdout = sys.__stdout__
 	if args.sublist is not None :
 		print("{0}[#] Launching Sublist3r with bruteforce module disabled.{1}".format(white, end))
 		text_trap = io.StringIO()
 		sys.stdout = text_trap
-		sublist3r.main(domain, 100, "{0}/dns/{0}.domains".format(domain), ports = None, silent = True, verbose = False, enable_bruteforce = False, engines = None)
+		sublist3r.main(domain, 100, "{0}/dns/domains".format(domain), ports = None, silent = True, verbose = False, enable_bruteforce = False, engines = None)
 		sys.stdout = sys.__stdout__
-	domain_file = open("{0}/dns/{0}.domains".format(domain), "r")
+	domain_file = open("{0}/dns/domains".format(domain), "r")
 	domains = domain_file.readlines()
 	domains.insert(0, domain + "\n")
 	domain_file.close()
-	domain_file = open("{0}/dns/{0}.domains".format(domain), "w")
+	domain_file = open("{0}/dns/domains".format(domain), "w")
 	if delete_www == "True" :
 		for line in domains :
 			if line.startswith("www.") :
@@ -217,7 +217,7 @@ def from_domains_to_ips(domain) :
 			ip = socket.gethostbyname(domain)
 			line_to_write = domain + " || " + ip + "\n"
 			output.write(line_to_write)
-			if ip not in ips :
+			if ip not in ips and ip != "" :
 				ips.append(ip)
 		except :
 			pass
@@ -267,7 +267,7 @@ def ip2host(domain) :
 	if found == 1 :
 		print("\t{0} New Virtual Hosts written in {1}/dns/domains{2}\n".format(red, save_domain, end))
 	else :
-		print("\t{0} No more Virtual Hosts found{1}".format(red, end))
+		print("\t{0} No more Virtual Hosts found{1}\n".format(red, end))
 
 	print("{0}[#] Using reverse DNS lookup to gather new domains !{1}\n".format(white, end))
 	domains = set(listdomains)
@@ -509,7 +509,7 @@ def documents_gathering(domain, extensions, delete_files):
 						write_file.close()
 						parse(save_domain, file_path, name_file)
 						sys.stdout.write('\r')
-						sys.stdout.write("{0}\tDownloaded {1} out of {2} .{3} files{4}\n".format(green, found, len(found_urls), ext, end))
+						sys.stdout.write("{0}\tDownloaded {1} out of {2} .{3} files{4}".format(green, found, len(found_urls), ext, end))
 						sys.stdout.flush()
 				time.sleep(randint(20, 30))
 				found = 0
@@ -528,6 +528,7 @@ def documents_gathering(domain, extensions, delete_files):
 			except Exception as e :
 				print(e)
 				pass
+		print("\n")
 	if delete_files == "False" :
 		print("\n\t{0}[!] {1} documents downloaded in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
 	else :
@@ -741,7 +742,7 @@ def mail_list_creator(domain, pattern) :
 					if pat == "flastname" :
 						write_output.write("{0}{1}@{2}\n".format(firstname[0], lastname, domain))
 			else:
-				write_output = open("{0}/harvest/{1}".format(domain, pattern), "w+")
+				write_output = open("{0}/harvest/{1}".format(domain, pattern), "a+")
 				if pattern == "firstname.lastname" :
 					write_output.write("{0}.{1}@{2}\n".format(firstname, lastname, domain))
 				if pattern == "lastname.firstname" :
@@ -910,8 +911,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if os.path.isdir(current_dir + "/" + domain) :
 	pass
 else :
-	os.system("mkdir {0}".format(domain))
-	os.system("mkdir {0}/dns {0}/document {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
+	os.system("mkdir {0} {0}/dns {0}/document {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
 	for ext in extensions :
 		ext = ext.replace("\n", "")
 		os.system("mkdir {0}/document/{1}".format(domain, ext))
