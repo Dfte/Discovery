@@ -26,44 +26,6 @@ from bs4 import BeautifulSoup
 from signal import signal, SIGINT
 from subprocess import check_output
 
-###################################
-# VARIABLES THAT YOU SHOULD MODIFY
-###################################
-
-##########################################################################
-# Get Shodan API key by creating an account here : https://www.shodan.io/
-##########################################################################
-shodan_api_key = ""
-
-############################################################################
-# Get WhatCMS API key by creating an account here : https://whatcms.org/API
-############################################################################
-whatcms_api_key = ""
-
-#####################################################################
-# Get Hunter API key by creating an account here :https://hunter.io/
-#####################################################################
-hunter_api_key = ""
-
-###################################################################################
-# Get RocketReach API key by creating an account here : https://rocketreach.co/api
-###################################################################################
-rocketreach_api_key = ""
-
-##################################
-# DON'T MODIFY ANYTHING ELSE :D ! 
-##################################
-
-#########################################################################
-# These are the global variables used to store emails and names gathered
-# DON'T DELETE THEM
-#########################################################################
-emails = []
-names = []
-software = []
-author = []
-last_save = []
-
 ########################
 # Colors code variables
 ########################
@@ -203,7 +165,7 @@ def ripe(domain) :
 # huge shout out to aboul3la for this tool !
 # Github : https://github.com/aboul3la/Sublist3r
 ############################################################################
-def get_domains(domain) :
+def get_domains(domain, delete_www) :
 	if args.subrute is not None :
 		print("{0}[#] Launching Sublist3r with bruteforce module enabled.{1}".format(white, end))
 		text_trap = io.StringIO()
@@ -221,14 +183,15 @@ def get_domains(domain) :
 	domains.insert(0, domain + "\n")
 	domain_file.close()
 	domain_file = open("{0}/dns/{0}.domains".format(domain), "w")
-	for line in domains :
-		if line.startswith("www.") :
-			wwwless = line.split("www.")[1]
-			domains.remove(line)
-			domains.append(wwwless)
-	domains = set(domains)
-	domain_file.writelines(domains)
-	domain_file.close()
+	if delete_www == "True" :
+		for line in domains :
+			if line.startswith("www.") :
+				wwwless = line.split("www.")[1]
+				domains.remove(line)
+				domains.append(wwwless)
+		domains = set(domains)
+		domain_file.writelines(domains)
+		domain_file.close()
 	print("{0}\tFound {1} domains : \n\t{2}{3}".format(green, len(domains), "\t".join(map(str, domains)), end))
 	print("\t{0}[!] List of {1} domains written in {2}/dns/domains{3}\n".format(red, len(domains), domain, end))
 	return
@@ -343,14 +306,8 @@ def reverseDNS(domain) :
 # CMS's used or WAFw00f tool to detect potential WAF's.
 # Github : https://github.com/EnableSecurity/wafw00f
 #############################################################################
-def scanner(domain, level) :
+def scanner(domain, files, level) :
 	data = ""
-	files = []
-	source_files = open("configuration/warning_files".format(domain), "r")
-	for warning_file in source_files.readlines() :
-		warning_file = warning_file.replace("\n", "")
-		files.append(warning_file)
-	source_files.close()
 	print("{0}[#] Scanning found IP's {1}\n".format(white, end))
 	ips = open("{0}/dns/ips".format(domain), "r")
 	ips = ips.readlines()
@@ -505,7 +462,7 @@ def scrape_shodan(domain):
 # pyfoca script written by altjx
 # Github : https://github.com/altjx/ipwn/tree/master/pyfoca
 ###########################################################################
-def documents_gathering(domain):
+def documents_gathering(domain, extensions, delete_files):
 	global author
 	global software
 	global last_save
@@ -522,9 +479,8 @@ def documents_gathering(domain):
 		"Referer": "https://www.google.com/",
 		"User-Agent": "Mozilla/5.0 (X11; Linux i686; rv:64.0) Gecko/20100101 Firefox/64.0",
 	}
-	exts = open("configuration/extensions", "r")
 	list_name = open("{0}/harvest/doc_usernames".format(domain), "w+")
-	for ext in exts.readlines() :
+	for ext in extensions :
 		count = 0
 		found = 0
 		ext = ext.replace("\n", "")
@@ -572,7 +528,11 @@ def documents_gathering(domain):
 			except Exception as e :
 				print(e)
 				pass
-	print("\n\t{0}[!] {1} documents downloaded in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
+	if delete_files == "False" :
+		print("\n\t{0}[!] {1} documents downloaded in {2}/document/.{3}\n".format(red, len(links), save_domain, end))
+	else :
+		print("\n\t{0}[!] {1} documents parsed and deleted\n".format(red, len(links), save_domain, end))
+		os.system("rm {0}/document/*")
 	list_name.close()
 	if len(author) > 0 :
 		output_write = open("{0}/document/metadatas_resume/authors".format(domain), "w+")
@@ -617,17 +577,12 @@ def parse(domain, path, name) :
 #############################################################################
 # This function will look for sensitives informations on pastebin and github
 #############################################################################
-def dumps(domain) :
+def dumps(domain, words) :
 	print("{0}[#] Looking for sensitive datas on dump plateforms.{1}".format(white, end))
 	sources =[]
 	outputs = open("configuration/sources", "r")
 	for output in outputs.readlines() :
 		sources.append(output.replace("\n", ""))
-	output = open("configuration/warning_words", "r")
-	words = []
-	for word in output.readlines() :
-		words.append(word.replace("\n", ""))
-	output.close()
 	pastes = []
 	links = []
 	save_domain = domain
@@ -745,25 +700,16 @@ def rocketreach(domain) :
 # In order for it to work, the script must first detect the pattern of an
 # original and validated emails of the company so that there are no mistakes
 #############################################################################
-def mail_list_creator(domain) :
+def mail_list_creator(domain, pattern) :
 	count = 0
 	global emails
 	patterns = ["firstname.lastname", "lastname.firstname", "firstname.lastname", "lastname.firstname", "f.lastname", "l.firstname", "flastname", "lfirstname"] 
 	global names
-	global firstname_lastname
-	global flastname
-	global lfirstname
-	global lastname_firstname
-	if os.path.isfile("configuration/email_pattern") :
-		output = open("configuration/email_pattern", "r")
-		for line in output.readlines() :
-			if line.startswith("pattern:") :
-				pattern = line.replace("\n", "").replace("pattern:", "")
-				if pattern in patterns :
-					print("{0}[#] Creating email list using {1} !{2}".format(white, pattern, end))
-				else :
-					pattern = None
-					print("{0}[#] Creating email lists !{1}".format(white, end))
+	if pattern in patterns :
+		print("{0}[#] Creating email list using {1} !{2}".format(white, pattern, end))
+	else :
+		pattern = None
+		print("{0}[#] Creating email lists !{1}".format(white, end))
 	for name in names :
 		# A changer
 		isascii = lambda name: len(name) == len(name.encode())
@@ -870,6 +816,93 @@ domain = args.single_domain
 #if validators.domain(domain) != True :
 #	sys.exit("{0}[!] Invalid domain name...{1}".format(red, end))
 
+######################
+# Just some variables
+######################
+emails = []
+names = []
+software = []
+author = []
+last_save = []
+extensions = []
+files = []
+words = []
+delete_files = ""
+delete_www = ""
+pattern = ""
+shodan_api_key = ""
+whatcms_api_key = ""
+hunter_api_key = ""
+rocketreach_api_key = ""
+
+print("{0}[#] Loading configuration file !{1}\n".format(white, end))
+if os.path.isfile("configure"):
+	output = open("configure", "r")
+	for line in output.readlines() :
+		if line.startswith("hunter_api_key") :
+			if len(line.split(":")[1]) > 1 :
+				hunter_api_key = line.split(":")[1].replace("\n", "")
+		if line.startswith("rocketreach_api_key")  :
+			if len(line.split(":")[1]) > 1 :
+				rocketreach_api_key = line.split(":")[1].replace("\n", "")
+		if line.startswith("shodan_api_key") :
+			if len(line.split(":")[1]) > 1 :
+				shodan_api_key = line.split(":")[1].replace("\n", "")
+		if line.startswith("whatcms_api_key") :
+			if len(line.split(":")[1]) > 1 :
+				whatcms_api_key = line.split(":")[1].replace("\n", "")
+		if line.startswith("whatcms_api_key") :
+			if len(line.split(":")[1]) > 1 :
+				whatcms_api_key = line.split(":")[1].replace("\n", "")
+		if line.startswith("delete_www") :
+			if len(line.split(":")[1]) > 1  and line.split(":")[1].replace("\n", "") in ["True", "true", "TRUE", "False", "false", "FALSE"]:
+				delete_www = line.split(":")[1].replace("\n", "")
+		if line.startswith("files") :
+			if len(line.split(":")[1]) > 1 :
+				fs = line.split(":")[1].replace("\n", "")
+				for f in fs.split(",") :
+					f = f.replace("\n", "")
+					files.append(f)
+		if line.startswith("extensions") :
+			if len(line.split(":")[1]) > 1 :
+				exts = line.split(":")[1].replace("\n", "")
+				for ext in exts.split(",") :
+					ext = ext.replace("\n", "")
+					extensions.append(ext)
+		if line.startswith("delete_files") :
+			if len(line.split(":")[1]) > 1 and line.split(":")[1].replace("\n", "") in ["True", "true", "TRUE", "False", "false", "FALSE"] :
+				delete_files = line.split(":")[1].replace("\n", "")
+		if line.startswith("sensitive") :
+			if len(line.split(":")[1]) > 1 :
+				wds = line.split(":")[1].replace("\n", "")
+				for wd in wds.split(",") :
+					wd = wd.replace("\n", "")
+					words.append(wd)
+		if line.startswith("pattern") :
+			if len(line.split(":")[1]) > 1 :
+				pattern = line.split(":")[1].replace("\n", "")
+else :
+	sys.exit("{0}[!] No configure file found... Using default values !{2}\n".format(white, end))
+
+if delete_files == "" :
+	delete_files = "False"
+if delete_www == "" :
+	delete_www = "True"
+if pattern == "" :
+	pattern = "None"
+if shodan_api_key == "" :
+	shodan_api_key = "None"
+	print("\t{0}[!] No shodan API key found.{1}".format(red, end))
+if whatcms_api_key == "" :
+	whatcms_api_key = "None"
+	print("\t{0}[!] No WhatCMS API key found.{1}".format(red, end))
+if hunter_api_key == "" :
+	hunter_api_key = "None"
+	print("\t{0}[!] No Hunter API key found.{1}".format(red, end))
+if rocketreach_api_key == "" :
+	rocketreach_api_key = "None"
+	print("\t{0}[!] No RocketReach API key found.{1}".format(red, end))
+
 ############################
 # Creating output structure
 ############################
@@ -879,7 +912,6 @@ if os.path.isdir(current_dir + "/" + domain) :
 else :
 	os.system("mkdir {0}".format(domain))
 	os.system("mkdir {0}/dns {0}/document {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
-	extensions = open("configuration/extensions").readlines()
 	for ext in extensions :
 		ext = ext.replace("\n", "")
 		os.system("mkdir {0}/document/{1}".format(domain, ext))
@@ -893,7 +925,7 @@ if args.dns :
 	dns_info(domain, dns_servers)
 	ripe(domain)
 if args.subrute or args.sublist :
-	get_domains(domain)
+	get_domains(domain, delete_www)
 	from_domains_to_ips(domain)
 	ip2host(domain)
 	#reverseDNS(domain)
@@ -902,16 +934,16 @@ if args.subrute or args.sublist :
 		#if shodan_api_key is not "" :
 			#scrape_shodan(domain)
 if args.scan :
-		scanner(domain, args.scan)
+		scanner(domain, files, args.scan)
 		if shodan_api_key is not "" :
 			scrape_shodan(domain)
 if args.gather :
-	#documents_gathering(domain)
-	dumps(domain)
+	documents_gathering(domain, extensions, delete_files)
+	dumps(domain, sensitive)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
-	mail_list_creator(domain)
+	mail_list_creator(domain, pattern)
 
 ############################
 # Print signature banner :D
