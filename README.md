@@ -192,7 +192,8 @@ All results will be written in a file in this tree :
  - DNS enumeration 
     - Check CN's in protocoles' certificates (ssh, ftps....)
     - Add FDNS databases lookup
- 
+    - Googid : search for Google Analytics ID to find other websites connected
+    - Domainview : get the websites that have an outlink from the target
  - Final :
     - Search on the deep web
     - Threads files downloads and modules so that they can work in parrallel
