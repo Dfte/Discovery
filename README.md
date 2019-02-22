@@ -1,7 +1,8 @@
 # Discovery
+Author Aurélien Chalot
+Version 2.0
 
-Discovery is a fully automated OSINT tool that will gather informations from a lot of differents sources. 
-Discovery relies on 6 modules that can be used all at once or independently. All you need to have to launch the tool is a domain name.
+Discovery is a fully automated OSINT tool that will gather informations from a lot of differents sources and cross the results in order to fingerprint as best as possible a domain name.
 
 ## Warning
 
@@ -11,23 +12,35 @@ This tool relies on 4 FREE API's :
 - Hunter.io : https://hunter.io/
 - RocketReach : https://rocketreach.co/api 
 
-BUT !
+You can chose whether or not you want to use them. If you don't provide  the API keys then the hunter, shodan, rocketreach and whatcms API won't be used.
 
-With Discovery v1.2 you can now use a huge part of the tool even without the API keys. Note that you will not be able to use the harvester module nor the shodan and whatCMS api.
+The tool configuration can be set in the configuration file :
+
+<div align="center">
+<img src="images/19.png">
+</div>
 
 ## Whois/DNS request
 
-This module can be called this way :
+How to use :
 
-    python3 discovery.py -d "domain_name" --dns
+    python3 discovery.py -d domain.tld --dns
 
-First of all it will query whois databases to gather informations about the domain name (who registered it, who is responsible of it etc...)
+This module actually does a lot of things :
+- Query Whois databases to gather the name of the registrant, who's responsible of it and some DNS servers name
+- Query Google DNS to retrieve records
+- Try to perform DNS transfert zone on the previously found DNS servers
+- Gather IPv4 ranges beloging to the domain.tld
 
-Then it will query Google DNS (8.8.8.8) to retrieve records. As for now it will also try to perform a DNS zone transfert and tell you if it went ok or not :
+<div align="center">
+<img src="images/10.png">
+</div>
 
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/1.png">
-</p>
+From this IP range Discovery will list all existant IP's :
+
+<div align="center">
+<img src="images/11.png">
+</div>
 
 ## DNS enumeration
 
@@ -35,81 +48,129 @@ The second module is the implementaiton of the sublist3r python3 module written 
 https://github.com/aboul3la/Sublist3r
 You can call it using two differents options :
 
-    python3 discovery.py -d "domain_name" --sublist
+    python3 discovery.py -d domain.tld --sublist
 or
 
-    python3 discovery.py -d "domain_name" --subrute
+    python3 discovery.py -d domain.tld --subrute
 
 The difference is that when using --subrute, sublist3r will perform a DNS bruteforce which will take much more time but will also find more subdomains.
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/12.png">
-</p>
+
+<div align="center">
+<img src="images/2.png">
+</div>
+
+In the configuration file you wan choose whether or not the www.domain.tld and domain.tld should be merged. You must be aware that almost all the time, www.domain.tld is the same thing as 
+domain.tld. But sometimes it is not which means we might loose some Virtual Hosts by merging www.domain.tld and domain.tld 
+
+This configuration can be done in the configuration file :
+
+<div align="center">
+<img src="images/20.png">
+</div>
 
 ## Scanner module
 
 This module is composed of two functions and can be called that way :
 
-    python3 discovery.py -d "domain_name" --scan ["full" or "fast"]
+    python3 discovery.py -d domain.tld --scan ["full" or "fast"]
 
 The first function is an implementaiton of the python nmap librairy. It will scan the discovered IP's either the "full" way (which means it will check for the all 65535 ports) or the "fast" way (-F nmap option).
 
-Depending of the services discovered it will perform a few actions. Actually I only took care of the HTTP/HTTPS services. So the script will check the SSL certificate, check for the CMS used (if there is one), check for comon important files (.git, /status, trace.axd, robots.txt. If those files are found, they will be downloaded).
+Depending of the services discovered it will perform a few actions :
+- Check SSL certificate
+- Check for the CMS used (if there is one)
+- Check for comon important files (.git, /status, trace.axd, robots.txt. If those files are found, they will be downloaded).
+- Look for WAF using Wafw00f (https://github.com/EnableSecurity/wafw00f)
+- Look For reverse proxy using HTTP-Traceroute.py made by Nicolas Gregoire and Julien Cayssol
 
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/16.png">
-</p>
+<div align="center">
+<img src="images/6.png">
+</div>
 
->Note : you can add as much files as you want in the "warning_file" file in the configuration directory.
+You can add as much files as you want in the configuration file :
 
-It will also look for potential WAF using the wafwoof tool developped by EnableSecurity : https://github.com/EnableSecurity/wafw00f
+<div align="center">
+<img src="images/21.png">
+</div>
 
-The tool will output an XML files that will be used with searchsploit in order to present you some exploits. (I still have to work on parsing the output of searchsploit but hey... This is coming soon :) )
+The tool will output an XML files that you will be able to add in the NMAP plugin (rapport type)
 
-The second function will use the Shodan API to gather informations about the domain name : found servers, services, CVE's related to the services as much as a description of CVE's found :
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/15.png">
-</p>
+The second function will use the Shodan API to gather informations about the domain name : found servers, services, CVE's related to the services and a quick decription
+
+<div align="center">
+<img src="images/5.png">
+</div>
 
 ## Metadatas Scrapper
 
-This module is basically my Linux version of FOCA :
+This module is basically my python version of FOCA :
 
-    python3 discovery.py -d "domain_name" --gather
+    python3 discovery.py -d domain.tld --gather
 
 Using Google dorks it will gather publicly exposed documents and parse their metadatas in order to find sensitive informations (credentials for exemple)
 This module is inspired by the pyfoca script written by altjx : https://github.com/altjx/ipwn/tree/master/pyfoca
 
 To parse the metadatas I used exiftool.
 
->Note : you can add as much extensions as you want in the "extensions" file in the configuration directory
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/13.png">
-</p>
+<div align="center">
+<img src="images/3.png">
+</div>
 
-All files found will be downloaded and parsed. 
+You can add as much extensions as you want in the configuration file :
+
+<div align="center">
+<img src="images/22.png">
+</div>
+
+Note that in order to be parsed, the gathered documents must be downloaded. Sometimes it might take a lot of space.
+If you don't want to keep the downloaded files you can set the option in the configuration so that they will be deleted once parsed :
+
+<div align="center">
+<img src="images/23.png">
+</div>
+
+This module will also check for sensitive files on Pastebin and Github. For each document found,it will check for the words filled in the configuration file :
+
+<div align="center">
+<img src="images/24.png">
+</div>
 
 ## Harvestor
 
-The last module will use differents API's to gather names of employee working for the given domain name. It will then create a few lists of emails for each emails patterns implemented (currently 4) :
+The last module will use differents API's to gather names of employee working for the given domain name. 
+Especially the RocketReach API using some parts of @Simon PeopleScrap tool :
+https://github.com/n3tsky/PeopleScrap
 
-    python3 discovery.py -d "domain_name" --harvest 
+It will then create a few lists of emails :
 
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/18.png">
-</p>
+    python3 discovery.py -d domain.tld --harvest 
+
+<div align="center">
+<img src="images/4.png">
+</div>
+
+You can set the pattern to use for the mail creation in the configuration file :
+
+<div align="center">
+<img src="images/25.png">
+</div>
+
+If you specify a non handled pattern or don't specify any then Discovery will create all possible lists using all handled patterns :
 
 # Full command 
 
 So basically if you want to run all modules you can use this command :
 
-    python3 discovery.py -d "domain_name" --dns (--sublist or --subrute) --scan (full or fast) --gather --harvest
+    python3 discovery.py -d domain.tld --dns (--sublist or --subrute) --scan (full or fast) --gather --harvest
+    
 All results will be written in a file in this tree :
 
-<p align="center">
-<img src="https://github.com/Dfte/Discovery/blob/master/images/17.png">
-</p>
+<div align="center">
+<img src="images/7.png">
+</div>
 
 # To Do list :
+
  - Code refactoring
     - Use of class
     - each functions/modules in separate files
@@ -121,13 +182,12 @@ All results will be written in a file in this tree :
     - Google dorks (index of, error message)
     
  - Scanning function
-    - May be add some web scanner or API that detects flaws related to a certain CMS  
+    - May be add some web scanner or API that detects flaws related to a certain CMS https://github.com/Tuhinshubhra/CMSeeK
     - Add Http screenshot
     - Searchsploit and parse output of searchsploit results
     - Add UDP scans
     - Dirbuster ? http/s vhost/ipt 
     - If SVN or .git -> dvcs ripper ???
-    - https://github.com/Tuhinshubhra/CMSeeK instead of whatcms api
  
  - DNS enumeration 
     - check for reverse dns (PTR ?)
@@ -142,3 +202,4 @@ All results will be written in a file in this tree :
     - Threads files downloads and modules so that they can work in parrallel
     - Get ride of the API's (especially the whatcms api and the hunter/rocketreach)
     - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
+
