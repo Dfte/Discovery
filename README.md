@@ -61,7 +61,7 @@ The difference is that when using --subrute, sublist3r will perform a DNS brutef
 
 Discovery will also use the IP2host feature from Bing in order to gather new Virtual Hosts.
 
-In the configuration file you wan choose whether or not the www.domain.tld and domain.tld should be merged. You must be aware that almost all the time, www.domain.tld is the same thing as 
+In the configuration file you can choose whether or not the www.domain.tld and domain.tld should be merged. You must be aware that almost all the time, www.domain.tld is the same thing as 
 domain.tld. But sometimes it is not which means we might loose some Virtual Hosts by merging www.domain.tld and domain.tld 
 
 This configuration can be done in the configuration file :
