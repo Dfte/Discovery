@@ -196,6 +196,6 @@ All results will be written in a file in this tree :
  - Final :
     - Search on the deep web
     - Threads files downloads and modules so that they can work in parrallel
-    - Get ride of the API's (especially the whatcms api and the hunter/rocketreach)
+    - Get ride of the API's (especially the whatcms api)
     - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
 
