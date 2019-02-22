@@ -267,7 +267,10 @@ def ip2host(domain) :
 			if h2.a:
 				if "bing" not in h2.a['href'] :
 					target = re.findall("https?:\/\/([^\/,\s]+\.[^\/,\s]+?)(?=\/|,|\s|$|\?|#)", h2.a['href'])
-					request = requests.get(h2.a['href'], verify = False)
+					try :
+						request = requests.get(h2.a['href'], verify = False)
+					except Exception as e:
+						pass
 					if (request.status_code == 403 and "forbidden" in request.text.lower()) or save_domain in request.text :
 						new_dom = h2.a['href'].replace("https://", "").replace("http://", "").split("/")[0]
 						if new_dom not in listdomains :
