@@ -285,6 +285,46 @@ def ip2host(domain) :
 	output_write.close()
 	return
 
+########################################################################
+# This function will use reverse dns lookup to detect new virtual hosts
+########################################################################
+def reverseDNS(domain) :
+	print("{0}[#] Using reverse DNS lookup to gather new Virtual Hosts !{1}\n".format(white, end))
+	save_domain = domain
+	pseudo_bool = 0
+	ips = open("{0}/dns/ips".format(domain), "r")
+	domains = open("{0}/dns/domains".format(domain), "r")
+	domain_list = []
+	for domain in domains :
+		domain = domain.replace("\n", "")
+		domain_list.append(domain)
+	domains.close()
+	for ip in ips.readlines() :
+		ip = ip.replace("\n", "")
+		try : 
+			dom = socket.gethostbyaddr(ip)
+			if dom :
+				dom = dom[0]
+				value = os.system("ping -c 1 {0} > /dev/null 2>&1".format(dom))
+				if value != 0 :
+					pass
+				request = requests.get(dom, verify = False, timeout = 5)
+				if save_domain in request.text :
+					print("\t{0}[-] New domain found : {1}{2}".format(green, dom, end))
+					pseudo_bool = 1
+					domain_list.append(dom)
+		except Exception as e :
+			pass
+	output_write = open("{0}/dns/domains".format(save_domain), "w+")
+	for domain in domain_list :
+		output_write.write(domain + "\n")
+	output_write.close()
+	if pseudo_bool == 0 :
+		print("\t{0}[!] No new domain found...{1}\n".format(red, end))
+	else :
+		print("\t{0}[!] New domain added to the existing ones !{1}\n".format(green, end))
+	return
+
 #############################################################################
 # This function will first launch a nmap scan on all ips/domains detected
 # or on the in scope domains/ips. Depending of the result a few others tools
@@ -920,6 +960,7 @@ if args.subrute or args.sublist :
 	get_domains(domain, delete_www)
 	from_domains_to_ips(domain)
 	ip2host(domain)
+	reverseDNS(domain)
 	if args.scan :
 		scanner(domain, args.scan)
 		if shodan_api_key is not "" :
