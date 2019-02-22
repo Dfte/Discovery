@@ -177,23 +177,21 @@ All results will be written in a file in this tree :
     - Review of the already existing code (adding some performance)
 
  - Document gathering :
-    - Search for sensitive files on Pastebin/Github (DONE FOR PASTEBIN)
+    - Search for sensitive files on Github
     - Archive.org : error messages
     - Google dorks (index of, error message)
     
  - Scanning function
-    - May be add some web scanner or API that detects flaws related to a certain CMS https://github.com/Tuhinshubhra/CMSeeK
+    - Implement https://github.com/Tuhinshubhra/CMSeeK for the CMS discovery
     - Add Http screenshot
-    - Searchsploit and parse output of searchsploit results
     - Add UDP scans
-    - Dirbuster ? http/s vhost/ipt 
-    - If SVN or .git -> dvcs ripper ???
+    - Dirbuster ? http/s vhost/ipt (MAY BE)
  
  - DNS enumeration 
-    - Check CN's in protocoles' certificates (ssh, ftps....)
     - Add FDNS databases lookup
     - Googid : search for Google Analytics ID to find other websites connected
     - Domainview : get the websites that have an outlink from the target
+    
  - Final :
     - Search on the deep web
     - Threads files downloads and modules so that they can work in parrallel
