@@ -140,7 +140,7 @@ This module will also check for sensitive files on Pastebin and Github. For each
 ## Harvestor
 
 The last module will use differents API's to gather names of employee working for the given domain name. 
-Especially the RocketReach API using some parts of @Simon PeopleScrap tool :
+Especially the RocketReach API using some parts of N3tsky's PeopleScrap tool :
 https://github.com/n3tsky/PeopleScrap
 
 It will then create a few lists of emails :
