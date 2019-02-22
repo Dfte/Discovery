@@ -47,7 +47,7 @@ def banner() :
     8I  Yb 88 `Ybo." dP   `" dP   Yb  Yb  dP  88__   88__dP  YbdP   
     8I  dY 88 o.`Y8b Yb      Yb   dP   YbdP   88""   88"Yb    8P   
    8888Y"  88 8bodP'  YboodP  YbodP     YP    888888 88  Yb  dP   
-   = 1602 ============================================== v1.2 ====
+   = 1602 ============================================== v2.0 ====
  	{1}""".format(yellow, end))
 	return
 
