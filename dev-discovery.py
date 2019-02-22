@@ -67,13 +67,15 @@ def get_whois(domain):
 					server = server.lower()
 					if server not in dns_servers :
 						dns_servers.append(server)
-					data += "\t{0}DNS Server : {1}{2}\n".format(green, server, end)
+					data += "\t{0}[-] DNS Server : {1}{2}\n".format(green, server, end)
 			if value == "registrar" :
-				data += "\t{0}Registrar : {1}{2}\n".format(green, str(values[value][0]), end)
+				data += "\t{0}[-] Registrar  : {1}{2}\n".format(green, str(values[value][0]), end)
 			if value == "contact" :
-				data += "\t{0}Contact : {1}{2}\n".format(green, str(values[value][0]), end)
+				data += "\t{0}[-]Contact : {1}{2}\n".format(green, str(values[value][0]), end)
 	print(data)
 	output_write = open("{0}/whois/results".format(domain), "w+")
+	output_write.write(data)
+	output_write.close()
 	print("{0}\t[!] Whois informations written in {1}/whois/results{2}\n".format(red, domain, end))
 	return dns_servers
 
@@ -90,21 +92,21 @@ def dns_info(domain, dns_servers):
 			if values :
 				for value in values:
 						if record == "A" :
-							data += "\tRecord A    : {0}\n".format(value)
+							data += "\t[-] Record A    : {0}\n".format(value)
 						if record == "AAAA" :
-							data += "\tRecord AAAA : {0}\n".format(value)
+							data += "\t[-] Record AAAA : {0}\n".format(value)
 						if record == "MX" :
-							data += "\tRecord MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0])
+							data += "\t[-] Record MX   : {0}\n".format(str(value.exchange).rsplit(".", 1)[0])
 						if record == "SOA" :
-							data += "\tRecord SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0])
+							data += "\t[-] Record SOA  : {0}\n".format(str(value.mname).rsplit(".", 1)[0])
 						if record == "NS" :
-							data += "\tRecord NS   : {0}\n".format(str(value).rsplit(".", 1)[0])
+							data += "\t[-] Record NS   : {0}\n".format(str(value).rsplit(".", 1)[0])
 							if str(value).rsplit(".", 1)[0] not in dns_servers :
 								dns_servers.append(str(value).rsplit(".", 1)[0])
 						if record == "TXT" :
-							data += "\tRecord TXT  : {0}\n".format(str(value).rsplit(".", 1)[0])
+							data += "\t[-] Record TXT  : {0}\n".format(str(value).rsplit(".", 1)[0])
 		except :
-			print("{0}\tNo record {1} found.{2}".format(red, record, end))
+			print("{0}\t[!] No record {1} found.{2}".format(red, record, end))
 			pass
 	print(data + "{0}".format(end))
 	print("\t{0}[!] Full dig report written in {1}/dns/dig{2}\n".format(red, domain, end))
@@ -114,13 +116,13 @@ def dns_info(domain, dns_servers):
 			if dns_server :
 				try :
 					result  = dns.zone.from_xfr(dns.query.xfr(dns_server, domain))
-					print("{0}\t-DNS zone transfer successful for {1}{2}".format(green, dns_server, end))
+					print("{0}\t[-] DNS zone transfer successful : for {1}{2}".format(green, dns_server, end))
 					write_to_file = open("{0}/dns/{1}.transfert".format(domain, dns_server), "w+")
 					write_to_file.write(output)
 					write_to_file.close()
-					print("{0}\t\tResults written in {1}/dns/{2}".format(red, domain, dns_server))
+					print("{0}\t\t[-] Results written in {1}/dns/{2}".format(red, domain, dns_server))
 				except  :
-					print("{0}\t{1} : failed.{2}".format(red, dns_server, end))
+					print("{0}\t[!] DNS zone transfer failed for : {1}{2}".format(red, dns_server, end))
 	output_write = open("{0}/dns/dig".format(domain), "w+")
 	output_write.write(data)
 	output_write.close()
@@ -144,7 +146,7 @@ def ripe(domain) :
 				ips = []
 				if content not in check :
 					check.append(content)
-					print("\t{0}".format(green) + content['value'] + "{0}".format(end))
+					print("\t{0}[-] Found IP range : {1}{2}".format(green, content['value'], end))
 					start = content['value'].split(" - ")[0]
 					final = content['value'].split(" - ")[1]
 					ipstruct = struct.Struct('>I')
@@ -153,10 +155,10 @@ def ripe(domain) :
 					for ip in [socket.inet_ntoa(ipstruct.pack(i)) for i in range(start, final + 1)] :
 						output_write.write(ip + "\n")
 			output_write.close()
-			print("\n\t{0}[!] IP ranges written in {1}/dns/ips.{2}\n".format(red, domain, end))
+			print("\n\t{0}[!] IP ranges written in {1}/dns/ips{2}\n".format(red, domain, end))
 			return
 	else :
-		print("\t{0}[!] No range found.{1}\n".format(red, end))
+		print("\t{0}[!] No range found{1}\n".format(red, end))
 	return 
 
 ############################################################################
@@ -166,6 +168,8 @@ def ripe(domain) :
 # Github : https://github.com/aboul3la/Sublist3r
 ############################################################################
 def get_domains(domain, delete_www) :
+	if os.path.isfile("{0}/dns/domains".format(domain)) :
+		os.system("rm {0}/dns/domains".format(domain))
 	if args.subrute is not None :
 		print("{0}[#] Launching Sublist3r with bruteforce module enabled.{1}".format(white, end))
 		text_trap = io.StringIO()
@@ -182,8 +186,8 @@ def get_domains(domain, delete_www) :
 	domains = domain_file.readlines()
 	domains.insert(0, domain + "\n")
 	domain_file.close()
-	domain_file = open("{0}/dns/domains".format(domain), "w")
 	if delete_www == "True" :
+		domain_file = open("{0}/dns/domains".format(domain), "w")
 		for line in domains :
 			if line.startswith("www.") :
 				wwwless = line.split("www.")[1]
@@ -201,12 +205,17 @@ def get_domains(domain, delete_www) :
 # domains linked to an IP
 ##########################################################################
 def from_domains_to_ips(domain) :
+	if os.path.isfile("{0}/dns/domains_to_ips".format(domain)) :
+		os.system("rm {0}/dns/domains_to_ips".format(domain))
 	save_domain = domain
 	ips = []
 	print("{0}[#] Translating domain names to IP's.{1}".format(white, end))
 	domains = open("{0}/dns/domains".format(domain), "r")
-	output = open("{0}/dns/domains_to_ips".format(domain), "w+")
-	output2 = open("{0}/dns/ips".format(domain), "r")
+	if os.path.isfile("{0}/dns/ips".format(domain)) :
+		output2 = open("{0}/dns/ips".format(domain), "r")
+	else :
+		output2 = open("{0}/dns/ips".format(domain), "w+")
+	output = open("{0}/dns/domains_to_ips".format(domain), "a")
 	for ip in output2.readlines() : 
 		ips.append(ip)
 	output2.close()
@@ -217,12 +226,13 @@ def from_domains_to_ips(domain) :
 			ip = socket.gethostbyname(domain)
 			line_to_write = domain + " || " + ip + "\n"
 			output.write(line_to_write)
-			if ip not in ips and ip != "" :
+			if ip not in ips and len(ip) > 0 :
 				ips.append(ip)
 		except :
 			pass
 	ips = set(ips)
 	for ip in ips :
+		ip = ip.replace("\n", "")
 		output2.write(ip + "\n")
 	output2.close()
 	domains.close()
@@ -243,11 +253,11 @@ def ip2host(domain) :
 	ips = open("{0}/dns/ips".format(domain), "r")
 	for ip in ips.readlines() :
 		ip = ip.replace("\n", "")
-		listip.append(ip.replace("\n", ""))
+		listip.append(ip)
 	ips.close()
 	for domain in domains.readlines() :
 		domain = domain.replace("\n", "")
-		listdomains.append(domain.replace("\n", ""))
+		listdomains.append(domain)
 	domains.close()
 	for ip in listip :
 		request = requests.get("https://www.bing.com/search?q=ip:{0}".format(ip))
@@ -261,17 +271,17 @@ def ip2host(domain) :
 					if (request.status_code == 403 and "forbidden" in request.text.lower()) or save_domain in request.text :
 						new_dom = h2.a['href'].replace("https://", "").replace("http://", "").split("/")[0]
 						if new_dom not in listdomains :
-							print("\t{0}New virtual host found : {1}{2}".format(green, new_dom, end))
+							print("\t{0}[-] New virtual host found : {1}{2}".format(green, new_dom, end))
 							listdomains.append(new_dom)
 							found = 1
 	if found == 1 :
-		print("\t{0} New Virtual Hosts written in {1}/dns/domains{2}\n".format(red, save_domain, end))
+		print("\n\t{0}[!] New Virtual Hosts added in {1}/dns/domains{2}\n".format(red, save_domain, end))
 	else :
-		print("\t{0} No more Virtual Hosts found{1}\n".format(red, end))
+		print("\t{0} [!] No more Virtual Hosts found{1}\n".format(red, end))
 
 	print("{0}[#] Using reverse DNS lookup to gather new domains !{1}\n".format(white, end))
 	domains = set(listdomains)
-	output_write = open("{0}/dns/domains".format(save_domain), "w")
+	output_write = open("{0}/dns/domains".format(save_domain), "w+")
 	for domain in listdomains :
 		output_write.write(domain + "\n")
 	output_write.close()
@@ -412,7 +422,7 @@ def scrape_shodan(domain):
 	print("{0}[#] Gathering informations from Shodan's API.{1}\n".format(white, end))
 	data = ""
 	api = shodan.Shodan(shodan_api_key)
-	targets = open("{0}/dns/{0}.ips".format(domain), "r")
+	targets = open("{0}/dns/ips".format(domain), "r")
 	for target in targets :
 		target = target.replace("\n", "")
 		target = re.findall( r'[0-9]+(?:\.[0-9]+){3}', target)
@@ -580,10 +590,7 @@ def parse(domain, path, name) :
 #############################################################################
 def dumps(domain, words) :
 	print("{0}[#] Looking for sensitive datas on dump plateforms.{1}".format(white, end))
-	sources =[]
-	outputs = open("configuration/sources", "r")
-	for output in outputs.readlines() :
-		sources.append(output.replace("\n", ""))
+	sources =["github.com", "pastebin.com"]
 	pastes = []
 	links = []
 	save_domain = domain
@@ -836,9 +843,9 @@ whatcms_api_key = ""
 hunter_api_key = ""
 rocketreach_api_key = ""
 
-print("{0}[#] Loading configuration file !{1}\n".format(white, end))
-if os.path.isfile("configure"):
-	output = open("configure", "r")
+print("{0}[#] Loading settings from the configuration file !{1}".format(white, end))
+if os.path.isfile("configuration"):
+	output = open("configuration", "r")
 	for line in output.readlines() :
 		if line.startswith("hunter_api_key") :
 			if len(line.split(":")[1]) > 1 :
@@ -883,7 +890,7 @@ if os.path.isfile("configure"):
 			if len(line.split(":")[1]) > 1 :
 				pattern = line.split(":")[1].replace("\n", "")
 else :
-	sys.exit("{0}[!] No configure file found... Using default values !{2}\n".format(white, end))
+	sys.exit("{0}[!] No configuration file found... Using default values !{2}\n".format(white, end))
 
 if delete_files == "" :
 	delete_files = "False"
@@ -892,18 +899,15 @@ if delete_www == "" :
 if pattern == "" :
 	pattern = "None"
 if shodan_api_key == "" :
-	shodan_api_key = "None"
 	print("\t{0}[!] No shodan API key found.{1}".format(red, end))
 if whatcms_api_key == "" :
-	whatcms_api_key = "None"
 	print("\t{0}[!] No WhatCMS API key found.{1}".format(red, end))
 if hunter_api_key == "" :
-	hunter_api_key = "None"
 	print("\t{0}[!] No Hunter API key found.{1}".format(red, end))
 if rocketreach_api_key == "" :
-	rocketreach_api_key = "None"
 	print("\t{0}[!] No RocketReach API key found.{1}".format(red, end))
 
+print("")
 ############################
 # Creating output structure
 ############################
@@ -939,7 +943,7 @@ if args.scan :
 			scrape_shodan(domain)
 if args.gather :
 	documents_gathering(domain, extensions, delete_files)
-	dumps(domain, sensitive)
+	dumps(domain, words)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
