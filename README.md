@@ -190,7 +190,6 @@ All results will be written in a file in this tree :
     - If SVN or .git -> dvcs ripper ???
  
  - DNS enumeration 
-    - check for reverse dns (PTR ?)
     - Check CN's in protocoles' certificates (ssh, ftps....)
     - Add FDNS databases lookup
  
