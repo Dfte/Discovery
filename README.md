@@ -4,7 +4,7 @@ Discovery is a fully automated OSINT tool that will gather informations from a l
 
 ## Warning
 
-This tool relies on 4 FREE API's : 
+This tool (for the moment ;) )relies on 4 FREE API's : 
 - Shodan : https://www.shodan.io/
 - WhatCMS : https://whatcms.org/API
 - Hunter.io : https://hunter.io/
