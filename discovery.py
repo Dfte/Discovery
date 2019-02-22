@@ -278,35 +278,11 @@ def ip2host(domain) :
 		print("\n\t{0}[!] New Virtual Hosts added in {1}/dns/domains{2}\n".format(red, save_domain, end))
 	else :
 		print("\t{0} [!] No more Virtual Hosts found{1}\n".format(red, end))
-
-	print("{0}[#] Using reverse DNS lookup to gather new domains !{1}\n".format(white, end))
 	domains = set(listdomains)
 	output_write = open("{0}/dns/domains".format(save_domain), "w+")
 	for domain in listdomains :
 		output_write.write(domain + "\n")
 	output_write.close()
-	return
-
-def reverseDNS(domain) :
-	listip = []
-	listdomains = []
-	ips = open("{0}/dns/ips".format(domain), "r")
-	domains = open("{0}/dns/domains".format(domain), "r")
-	for ip in ips.readlines() :
-		ip = ip.replace("\n", "")
-		listip.append(ip.replace("\n", ""))
-	ips.close()
-	for domain in domains.readlines() :
-		domain = domain.replace("\n", "")
-		listdomains.append(domain.replace("\n", ""))
-	domains.close()
-	print(listip)
-	for ip in listip :
-		try :
-			result = socket.gethostbyaddr(ip)
-			print(result)
-		except :
-			pass
 	return
 
 #############################################################################
@@ -323,7 +299,8 @@ def scanner(domain, files, level) :
 	ips = ips.readlines()
 	for ip in ips :
 		ip = ip.replace("\n", "")
-		os.system("mkdir {0}/scan/{1}".format(domain, ip))
+		if not os.path.isdir("{0}/scan/{1}".format(domain, ip)) :
+			os.system("mkdir {0}/scan/{1}".format(domain, ip))
 		nm = nmap.PortScanner()
 		if level == "full" :
 			print("{0}\tScanning {1} with Nmap (full scan){2}".format(white, ip, end))
@@ -389,6 +366,15 @@ def scanner(domain, files, level) :
 								output_write.close()
 							except :
 								pass
+							############################
+							### Reverse Proxy detection 
+							############################
+							output = check_output(["python", "modules/HTTP-Traceroute.py", "-t", "{0}".format(ip)])
+							output = output.decode('ascii')
+							if "No reverse proxy" in output : 
+								data += "\t\t{0}No Reverse proxy detected{1}\n".format(green, end)
+							elif "Found a reverse proxy" in output :
+								data += "\t\t{0}Reverse proxy detected{1}\n".format(red, end)
 							################################
 							###Detection of sensitive files
 							################################
@@ -396,7 +382,8 @@ def scanner(domain, files, level) :
 								request =  requests.get(url + "{0}".format(important_file))
 								if request.status_code == 200 :
 									data += "\t\t{0}Found {1} file on {2}{1} -> downloaded !{3}\n".format(red, important_file, url, end)
-									os.system("mkdir {0}/scan/{1}/sensitive_files/".format(domain, ip))
+									if not os.path.isdir("{0}/scan/{1}/sensitive_files/".format(domain, ip)) :
+										os.system("mkdir {0}/scan/{1}/sensitive_files/".format(domain, ip))
 									if important_file.startswith(".") :
 										important_file = important_file.split(".")[1]
 									write_to = open("{0}/scan/{1}/sensitive_files/{2}".format(domain, ip, important_file), "w+")
@@ -404,7 +391,7 @@ def scanner(domain, files, level) :
 									write_to.close()
 						else :
 							data += "\t{0}port : {1}{2}\t{4}state : {3}\tService : {5}/{6}{2}\n".format(green, port, end, nm[host][proto][port]["state"], white, nm[host]["tcp"][int(port)]["product"], nm[host]["tcp"][int(port)]["version"])
-			data += "\t{0}----------------------------------------------------------------------------------{1}".format(white, end)
+			data += "\t{0}----------------------------------------------------------------------------------{1}\n".format(white, end)
 			print(data)
 			written_to = open("{0}/scan/{1}/nmap.txt".format(domain, ip), "w+")
 			written_to.write(data)
@@ -412,6 +399,7 @@ def scanner(domain, files, level) :
 			written_to = open("{0}/scan/{1}/nmap.xml".format(domain, ip), "w+")
 			written_to.write(nm.get_nmap_last_output())
 			written_to.close()
+		break
 	return
 
 ##########################################################################
@@ -814,15 +802,15 @@ parser.add_argument("--scan", help = "Type of scan : fast = 1000 first ports, al
 parser.add_argument("--gather", help = "Will download and check for metadats in files.", nargs = "?", const = "yes", dest = "gather")
 parser.add_argument("--harvest", help = "Will create multiples lists of email addresses using differents API's.", nargs = "?", const = "yes", dest = "harvest")
 args = parser.parse_args()
-#if (not args.sublist or not args.subrute) and args.scan :
-#	sys.exit("{0}[!] You need to enable --sublist or --subrute module to use --scan{1}".format(red, end))
+if (not args.sublist or not args.subrute) and args.scan :
+	sys.exit("{0}[!] You need to enable --sublist or --subrute module to use --scan{1}".format(red, end))
 
 ##################################
 #The most important variable :D !
 ##################################
 domain = args.single_domain
-#if validators.domain(domain) != True :
-#	sys.exit("{0}[!] Invalid domain name...{1}".format(red, end))
+if validators.domain(domain) != True :
+	sys.exit("{0}[!] Invalid domain name...{1}".format(red, end))
 
 ######################
 # Just some variables
@@ -932,13 +920,8 @@ if args.subrute or args.sublist :
 	get_domains(domain, delete_www)
 	from_domains_to_ips(domain)
 	ip2host(domain)
-	#reverseDNS(domain)
-	#if args.scan :
-		#scanner(domain, args.scan)
-		#if shodan_api_key is not "" :
-			#scrape_shodan(domain)
-if args.scan :
-		scanner(domain, files, args.scan)
+	if args.scan :
+		scanner(domain, args.scan)
 		if shodan_api_key is not "" :
 			scrape_shodan(domain)
 if args.gather :
