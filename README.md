@@ -1,6 +1,6 @@
 # Discovery
-Author Aurélien Chalot
-Version 2.0
+Author Aurélien Chalot</br>
+Version 2.0</br>
 
 Discovery is a fully automated OSINT tool that will gather informations from a lot of differents sources and cross the results in order to fingerprint as best as possible a domain name.
 
