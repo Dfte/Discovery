@@ -17,7 +17,7 @@ You can chose whether or not you want to use them. If you don't provide  the API
 The tool configuration can be set in the configuration file :
 
 <div align="center">
-<img src="images/19.png">
+<img src="images/1.png">
 </div>
 
 ## Whois/DNS request
@@ -33,13 +33,13 @@ This module actually does a lot of things :
 - Gather IPv4 ranges beloging to the domain.tld
 
 <div align="center">
-<img src="images/10.png">
+<img src="images/2.png">
 </div>
 
 From this IP range Discovery will list all existant IP's :
 
 <div align="center">
-<img src="images/11.png">
+<img src="images/3.png">
 </div>
 
 ## DNS enumeration
@@ -56,7 +56,7 @@ or
 The difference is that when using --subrute, sublist3r will perform a DNS bruteforce which will take much more time but will also find more subdomains.
 
 <div align="center">
-<img src="images/2.png">
+<img src="images/4.png">
 </div>
 
 In the configuration file you wan choose whether or not the www.domain.tld and domain.tld should be merged. You must be aware that almost all the time, www.domain.tld is the same thing as 
@@ -65,7 +65,7 @@ domain.tld. But sometimes it is not which means we might loose some Virtual Host
 This configuration can be done in the configuration file :
 
 <div align="center">
-<img src="images/20.png">
+<img src="images/5.png">
 </div>
 
 ## Scanner module
@@ -90,7 +90,7 @@ Depending of the services discovered it will perform a few actions :
 You can add as much files as you want in the configuration file :
 
 <div align="center">
-<img src="images/21.png">
+<img src="images/7.png">
 </div>
 
 The tool will output an XML files that you will be able to add in the NMAP plugin (rapport type)
@@ -98,7 +98,7 @@ The tool will output an XML files that you will be able to add in the NMAP plugi
 The second function will use the Shodan API to gather informations about the domain name : found servers, services, CVE's related to the services and a quick decription
 
 <div align="center">
-<img src="images/5.png">
+<img src="images/8.png">
 </div>
 
 ## Metadatas Scrapper
@@ -113,26 +113,26 @@ This module is inspired by the pyfoca script written by altjx : https://github.c
 To parse the metadatas I used exiftool.
 
 <div align="center">
-<img src="images/3.png">
+<img src="images/9.png">
 </div>
 
 You can add as much extensions as you want in the configuration file :
 
 <div align="center">
-<img src="images/22.png">
+<img src="images/10.png">
 </div>
 
 Note that in order to be parsed, the gathered documents must be downloaded. Sometimes it might take a lot of space.
 If you don't want to keep the downloaded files you can set the option in the configuration so that they will be deleted once parsed :
 
 <div align="center">
-<img src="images/23.png">
+<img src="images/11.png">
 </div>
 
 This module will also check for sensitive files on Pastebin and Github. For each document found,it will check for the words filled in the configuration file :
 
 <div align="center">
-<img src="images/24.png">
+<img src="images/12.png">
 </div>
 
 ## Harvestor
@@ -146,13 +146,13 @@ It will then create a few lists of emails :
     python3 discovery.py -d domain.tld --harvest 
 
 <div align="center">
-<img src="images/4.png">
+<img src="images/13.png">
 </div>
 
 You can set the pattern to use for the mail creation in the configuration file :
 
 <div align="center">
-<img src="images/25.png">
+<img src="images/14.png">
 </div>
 
 If you specify a non handled pattern or don't specify any then Discovery will create all possible lists using all handled patterns :
@@ -166,7 +166,7 @@ So basically if you want to run all modules you can use this command :
 All results will be written in a file in this tree :
 
 <div align="center">
-<img src="images/7.png">
+<img src="images/15.png">
 </div>
 
 # To Do list :
