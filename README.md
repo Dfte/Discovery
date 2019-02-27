@@ -197,4 +197,4 @@ All results will be written in a file in this tree :
     - Threads files downloads and modules so that they can work in parrallel
     - Get ride of the API's (especially the whatcms api)
     - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
-
+    - If IP scope is already known, add the possibilitity to remove every domain/ips not in scope
