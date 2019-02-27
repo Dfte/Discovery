@@ -186,6 +186,7 @@ All results will be written in a file in this tree :
     - Add Http screenshot
     - Add UDP scans
     - Dirbuster ? http/s vhost/ipt (MAY BE)
+    - Rework 
  
  - DNS enumeration 
     - Add FDNS databases lookup
