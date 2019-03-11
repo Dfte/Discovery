@@ -47,7 +47,7 @@ def banner() :
     8I  Yb 88 `Ybo." dP   `" dP   Yb  Yb  dP  88__   88__dP  YbdP   
     8I  dY 88 o.`Y8b Yb      Yb   dP   YbdP   88""   88"Yb    8P   
    8888Y"  88 8bodP'  YboodP  YbodP     YP    888888 88  Yb  dP   
-   = 1602 ============================================== v1.2 ====
+   = 1602 ============================================== v2.0 ====
  	{1}""".format(yellow, end))
 	return
 
@@ -267,7 +267,10 @@ def ip2host(domain) :
 			if h2.a:
 				if "bing" not in h2.a['href'] :
 					target = re.findall("https?:\/\/([^\/,\s]+\.[^\/,\s]+?)(?=\/|,|\s|$|\?|#)", h2.a['href'])
-					request = requests.get(h2.a['href'], verify = False)
+					try :
+						request = requests.get(h2.a['href'], verify = False)
+					except Exception as e:
+						pass
 					if (request.status_code == 403 and "forbidden" in request.text.lower()) or save_domain in request.text :
 						new_dom = h2.a['href'].replace("https://", "").replace("http://", "").split("/")[0]
 						if new_dom not in listdomains :
@@ -283,46 +286,6 @@ def ip2host(domain) :
 	for domain in listdomains :
 		output_write.write(domain + "\n")
 	output_write.close()
-	return
-
-########################################################################
-# This function will use reverse dns lookup to detect new virtual hosts
-########################################################################
-def reverseDNS(domain) :
-	print("{0}[#] Using reverse DNS lookup to gather new Virtual Hosts !{1}\n".format(white, end))
-	save_domain = domain
-	pseudo_bool = 0
-	ips = open("{0}/dns/ips".format(domain), "r")
-	domains = open("{0}/dns/domains".format(domain), "r")
-	domain_list = []
-	for domain in domains :
-		domain = domain.replace("\n", "")
-		domain_list.append(domain)
-	domains.close()
-	for ip in ips.readlines() :
-		ip = ip.replace("\n", "")
-		try : 
-			dom = socket.gethostbyaddr(ip)
-			if dom :
-				dom = dom[0]
-				value = os.system("ping -c 1 {0} > /dev/null 2>&1".format(dom))
-				if value != 0 :
-					pass
-				request = requests.get(dom, verify = False, timeout = 5)
-				if save_domain in request.text :
-					print("\t{0}[-] New domain found : {1}{2}".format(green, dom, end))
-					pseudo_bool = 1
-					domain_list.append(dom)
-		except Exception as e :
-			pass
-	output_write = open("{0}/dns/domains".format(save_domain), "w+")
-	for domain in domain_list :
-		output_write.write(domain + "\n")
-	output_write.close()
-	if pseudo_bool == 0 :
-		print("\t{0}[!] No new domain found...{1}\n".format(red, end))
-	else :
-		print("\t{0}[!] New domain added to the existing ones !{1}\n".format(green, end))
 	return
 
 #############################################################################
@@ -805,6 +768,31 @@ def mail_list_creator(domain, pattern) :
 	else :
 		return None
 
+###################################################################################
+# This function will us pwndb databases to find leaked accounts for a given domain
+# This function uses pwndb.py script written by David Tavarez
+# Github : https://github.com/davidtavarez/pwndb
+###################################################################################
+def password_leaks(domain) :
+	print("{0}[#] Looking for leaked accounts on pwndb !{1}".format(white, end))
+	output = os.system("systemctl status tor > 1 2>&1")
+	if output != 0 :
+		print("\t{0}[!] Tor services is required to use pwndb !{1}".format(red, end))
+		return
+	output = check_output(["modules/./pwndb.py", "--target", "@{0}".format(domain), "--output", "txt"])
+	output = output.decode('ascii')
+	buf = io.StringIO(output).read()
+	output_write = open("{0}/harvest/leaked_accounts".format(domain), "w+")
+	output_write.write(buf)
+	output_write.close()
+	leaks = open("{0}/harvest/leaked_accounts".format(domain), "r").readlines()
+	if len(leaks) > 0 :
+		print("\t{0}[!] Found {1} accounts leaked !{2}".format(red, len(leaks), end))
+		for leak in leaks :
+			leak = leak.replace("\n", "")
+			print("\t{0}[-] {1} {2}".format(green, leak, end))
+	return
+
 def interruptHandler(signal, frame):
 	print("{0}\n[!] User interruption... Leaving ! :) !{1}\n".format(red, end))
 	signature()
@@ -940,10 +928,8 @@ print("")
 # Creating output structure
 ############################
 current_dir = os.path.dirname(os.path.abspath(__file__))
-if os.path.isdir(current_dir + "/" + domain) :
-	pass
-else :
-	os.system("mkdir {0} {0}/dns {0}/document {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
+if not os.path.isdir(current_dir + "/" + domain) :
+	os.system("mkdir {0} {0}/dns {0}/document/ {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
 	for ext in extensions :
 		ext = ext.replace("\n", "")
 		os.system("mkdir {0}/document/{1}".format(domain, ext))
@@ -960,7 +946,6 @@ if args.subrute or args.sublist :
 	get_domains(domain, delete_www)
 	from_domains_to_ips(domain)
 	ip2host(domain)
-	reverseDNS(domain)
 	if args.scan :
 		scanner(domain, args.scan)
 		if shodan_api_key is not "" :
@@ -972,6 +957,7 @@ if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
 	hunter(domain)
 	rocketreach(domain)
 	mail_list_creator(domain, pattern)
+	password_leaks(domain) 
 
 ############################
 # Print signature banner :D
