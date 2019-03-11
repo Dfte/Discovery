@@ -185,18 +185,13 @@ All results will be written in a file in this tree :
     
  - Scanning function
     - Implement https://github.com/Tuhinshubhra/CMSeeK for the CMS discovery
-    - Add Http screenshot
-    - Add UDP scans
-    - Dirbuster ? http/s vhost/ipt (MAY BE)
     - Rework 
  
  - DNS enumeration 
     - Add FDNS databases lookup
     - Googid : search for Google Analytics ID to find other websites connected
-    - Domainview : get the websites that have an outlink from the target
     
  - Final :
-    - Search on the deep web
     - Threads files downloads and modules so that they can work in parrallel
     - Get ride of the API's (especially the whatcms api)
     - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
