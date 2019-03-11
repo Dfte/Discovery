@@ -768,6 +768,31 @@ def mail_list_creator(domain, pattern) :
 	else :
 		return None
 
+###################################################################################
+# This function will us pwndb databases to find leaked accounts for a given domain
+# This function uses pwndb.py script written by David Tavarez
+# Github : https://github.com/davidtavarez/pwndb
+###################################################################################
+def password_leaks(domain) :
+	print("{0}[#] Looking for leaked accounts on pwndb !{1}".format(white, end))
+	output = os.system("systemctl status tor > 1 2>&1")
+	if output != 0 :
+		print("\t{0}[!] Tor services is required to use pwndb !{1}".format(red, end))
+		return
+	output = check_output(["modules/./pwndb.py", "--target", "@{0}".format(domain), "--output", "txt"])
+	output = output.decode('ascii')
+	buf = io.StringIO(output).read()
+	output_write = open("{0}/harvest/leaked_accounts".format(domain), "w+")
+	output_write.write(buf)
+	output_write.close()
+	leaks = open("{0}/harvest/leaked_accounts".format(domain), "r").readlines()
+	if len(leaks) > 0 :
+		print("\t{0}[!] Found {1} accounts leaked !{2}".format(red, len(leaks), end))
+		for leak in leaks :
+			leak = leak.replace("\n", "")
+			print("\t{0}[-] {1} {2}".format(green, leak, end))
+	return
+
 def interruptHandler(signal, frame):
 	print("{0}\n[!] User interruption... Leaving ! :) !{1}\n".format(red, end))
 	signature()
@@ -903,10 +928,8 @@ print("")
 # Creating output structure
 ############################
 current_dir = os.path.dirname(os.path.abspath(__file__))
-if os.path.isdir(current_dir + "/" + domain) :
-	pass
-else :
-	os.system("mkdir {0} {0}/dns {0}/document {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
+if not os.path.isdir(current_dir + "/" + domain) :
+	os.system("mkdir {0} {0}/dns {0}/document/ {0}/document/pastebin {0}/shodan {0}/harvest {0}/scan {0}/whois {0}/document/metadatas_full {0}/document/metadatas_resume".format(domain))
 	for ext in extensions :
 		ext = ext.replace("\n", "")
 		os.system("mkdir {0}/document/{1}".format(domain, ext))
@@ -935,9 +958,10 @@ if args.gather :
 	documents_gathering(domain, extensions, delete_files)
 	dumps(domain, words)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
-	hunter(domain)
-	rocketreach(domain)
-	mail_list_creator(domain, pattern)
+	#hunter(domain)
+	#rocketreach(domain)
+	#mail_list_creator(domain, pattern)
+	password_leaks(domain) 
 
 ############################
 # Print signature banner :D
