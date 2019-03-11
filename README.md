@@ -155,9 +155,11 @@ You can set the pattern to use for the mail creation in the configuration file :
 <img src="images/14.png">
 </div>
 
-If you specify a non handled pattern or don't specify any then Discovery will create all possible lists using all handled patterns :
+If you specify a non handled pattern or don't specify any then Discovery will create all possible lists using all handled patterns.
 
-# Full command 
+Finally it will query the Web API pwndb available on the Deep Web to retrieve emails and passwords linked to a certain domain.
+
+# Full commannd
 
 So basically if you want to run all modules you can use this command :
 
