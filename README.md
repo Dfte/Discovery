@@ -179,9 +179,7 @@ All results will be written in a file in this tree :
     - Review of the already existing code (adding some performance)
 
  - Document gathering :
-    - Search for sensitive files on Github
-    - Archive.org : error messages
-    - Google dorks (index of, error message)
+    - Search for sensitive files on Github (to finish)
     
  - Scanning function
     - Implement https://github.com/Tuhinshubhra/CMSeeK for the CMS discovery
@@ -192,7 +190,7 @@ All results will be written in a file in this tree :
     - Googid : search for Google Analytics ID to find other websites connected
     
  - Final :
-    - Threads files downloads and modules so that they can work in parrallel
+    - Threads files downloads in order to speed up file download process
     - Get ride of the API's (especially the whatcms api)
     - Add the possibility to use some modules with a list of domains (at least --sublist/--subrute and --harvest)
     - If IP scope is already known, add the possibilitity to remove every domain/ips not in scope
