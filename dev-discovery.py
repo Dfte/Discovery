@@ -82,13 +82,18 @@ def get_whois(domain):
 ################################################################################################
 # This function will try to achieve DNS transfert, query DNS'su sing dig and parses the results
 ################################################################################################
-def dns_info(domain, dns_servers):
-	print("{}[#] Gathering informations using DNS queries.{}".format(white, end))
+def dns_info(domain, dns_servers, dns_to_ask):
+	print("{0}[#] Gathering DNS entries querying {1} server.{2}".format(white, dns_to_ask, end))
 	data = "{0}".format(green)
+	dns_to_ask = [dns_to_ask]
 	records = ["A", "AAAA", "SOA", "NS", "MX", "TXT"]
+	resolv = dns.resolver.Resolver()
+	resolv.timeout = 2
+	resolv.lifetime = 2
+	resolv.nameservers = dns_to_ask
 	for record in records :
 		try :
-			values = dns.resolver.query(domain, record)
+			values = resolv.query(domain, record)
 			if values :
 				for value in values:
 						if record == "A" :
@@ -289,7 +294,7 @@ def ip2host(domain) :
 	return
 
 #############################################################################
-# This function will first launch a nmap scan on all ips/domains detected
+# This funœction will first launch a nmap scan on all ips/domains detected
 # or on the in scope domains/ips. Depending of the result a few others tools
 # will be used (sslscan for testing ssl certificats), whatcms API to detect
 # CMS's used or WAFw00f tool to detect potential WAF's.
@@ -830,15 +835,15 @@ parser.add_argument("--scan", help = "Type of scan : fast = 1000 first ports, al
 parser.add_argument("--gather", help = "Will download and check for metadats in files.", nargs = "?", const = "yes", dest = "gather")
 parser.add_argument("--harvest", help = "Will create multiples lists of email addresses using differents API's.", nargs = "?", const = "yes", dest = "harvest")
 args = parser.parse_args()
-#if (not args.sublist or not args.subrute) and args.scan :
-#	sys.exit("{0}[!] You need to enable --sublist or --subrute module to use --scan{1}".format(red, end))
+if (not args.sublist or not args.subrute) and args.scan :
+	sys.exit("{0}[!] You need to enable --sublist or --subrute module to use --scan{1}".format(red, end))
 
 ##################################
 #The most important variable :D !
 ##################################
 domain = args.single_domain
-#if validators.domain(domain) != True :
-#	sys.exit("{0}[!] Invalid domain name...{1}".format(red, end))
+if validators.domain(domain) != True :
+	sys.exit("{0}[!] Invalid domain name...{1}".format(red, end))
 
 ######################
 # Just some variables
@@ -858,6 +863,7 @@ shodan_api_key = ""
 whatcms_api_key = ""
 hunter_api_key = ""
 rocketreach_api_key = ""
+dns_to_ask = ""
 
 print("{0}[#] Loading settings from the configuration file !{1}".format(white, end))
 if os.path.isfile("configuration"):
@@ -905,6 +911,9 @@ if os.path.isfile("configuration"):
 		if line.startswith("pattern") :
 			if len(line.split(":")[1]) > 1 :
 				pattern = line.split(":")[1].replace("\n", "")
+		if line.startswith("dns") :
+			if len(line.split(":")[1]) > 1 :
+				dns_to_ask = line.split(":")[1].replace("\n", "")
 else :
 	sys.exit("{0}[!] No configuration file found... Using default values !{2}\n".format(white, end))
 
@@ -914,6 +923,8 @@ if delete_www == "" :
 	delete_www = "True"
 if pattern == "" :
 	pattern = "None"
+if dns_to_ask == "" :
+	dns_to_ask = "8.8.8.8"
 if shodan_api_key == "" :
 	print("\t{0}[!] No shodan API key found.{1}".format(red, end))
 if whatcms_api_key == "" :
@@ -940,27 +951,23 @@ if not os.path.isdir(current_dir + "/" + domain) :
 
 if args.dns :
 	dns_servers = get_whois(domain)
-	dns_info(domain, dns_servers)
+	dns_info(domain, dns_servers, dns_to_ask)
 	ripe(domain)
 if args.subrute or args.sublist :
 	get_domains(domain, delete_www)
 	from_domains_to_ips(domain)
 	ip2host(domain)
-	#if args.scan :
-		#scanner(domain, args.scan)
-		#if shodan_api_key is not "" :
-			#scrape_shodan(domain)
-if args.scan :
-		scanner(domain, files, args.scan)
-		#if shodan_api_key is not "" :
-			#scrape_shodan(domain)
+	if args.scan :
+		scanner(domain, args.scan)
+		if shodan_api_key is not "" :
+			scrape_shodan(domain)
 if args.gather :
 	documents_gathering(domain, extensions, delete_files)
 	dumps(domain, words)
 if args.harvest and hunter_api_key is not "" and rocketreach_api_key is not "" :
-	#hunter(domain)
-	#rocketreach(domain)
-	#mail_list_creator(domain, pattern)
+	hunter(domain)
+	rocketreach(domain)
+	mail_list_creator(domain, pattern)
 	password_leaks(domain) 
 
 ############################
