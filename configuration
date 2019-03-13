@@ -11,6 +11,12 @@ rocketreach_api_key:
 shodan_api_key:
 whatcms_api_key:
 
+###### DNS module ######
+
+# This option will tell Discovery which DNS server it should query to gather DNS entries
+# Default value is 8.8.8.8 (Google DNS)
+dns:8.8.8.8
+
 ###### Sublist/Subrute modules ######
 
 # This option will tell Discovery whether or not www.domain.tld and domain.tld should be
@@ -34,7 +40,7 @@ files:.git,trace.axd,status,robots.txt,.svn,WSDL,crossdomain.xml
 
 # This option will tell Discovery what file extension it should look for
 # You can add as much as extensions as you want separated by a comma
-extensions:pdf,xls,doc,xlsx,exe,ppt,docx,txt,pptx,csv,odt,ods,
+extensions:pdf,xls,doc,xlsx,exe,ppt,docx,txt,pptx,csv,odt,ods
 
 # This option will tell Discovery wheter or not it should keep the downloaded documents 
 # after having parsed them.
