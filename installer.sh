@@ -2,7 +2,7 @@
 ###################
 # Python3 librairy
 ###################
-pip3 install shodan python-nmap beautifulsoup4 validators
+pip3 install shodan python-nmap beautifulsoup4 validators mysql-connector-python
 git clone https://github.com/rthalley/dnspython.git
 cd dnspython
 python3 setup.py install
