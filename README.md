@@ -188,7 +188,8 @@ All results will be written in a file in this tree :
  - DNS enumeration 
     - Add FDNS databases lookup
     - Googid : search for Google Analytics ID to find other websites connected
-    
+ 
+ - https://github.com/tomnomnom/waybackurls
  - Final :
     - Threads files downloads in order to speed up file download process
     - Get ride of the API's (especially the whatcms api)
